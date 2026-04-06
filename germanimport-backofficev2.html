@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GermanImport - Backoffice</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0a0a0a;--dark:#111;--card:#181818;--border:#252525;--grey:#888;
+  --white:#f5f5f5;--gold:#c8a24e;--gold-dim:rgba(200,162,78,0.08);--gold-light:#dbb75a;
+  --green:#4caf50;--red:#e53935;--orange:#ff9800;--blue:#4c8faf;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeSpeed;}
+a{color:var(--gold);text-decoration:none;}
+
+/* ── LOGIN ── */
+.login-overlay{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:var(--dark);border:1px solid var(--border);border-radius:12px;padding:48px 36px;width:90%;max-width:380px;text-align:center;}
+.login-logo{height:80px;margin-bottom:20px;display:block;margin-left:auto;margin-right:auto;}
+.login-title{font-size:18px;font-weight:600;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--grey);margin-bottom:28px;}
+.login-field{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:12px 16px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:12px;outline:none;}
+.login-field:focus{border-color:var(--gold);}
+.login-field::placeholder{color:rgba(255,255,255,0.25);}
+.login-btn{width:100%;background:var(--gold);color:var(--black);border:none;padding:14px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;transition:all .2s;}
+.login-btn:hover{background:var(--gold-light);}
+.login-error{color:var(--red);font-size:12px;margin-top:12px;display:none;}
+.login-tab{flex:1;padding:10px;background:transparent;border:none;color:var(--grey);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.login-tab:hover{color:var(--white);}
+.login-tab.active{background:var(--gold);color:var(--black);}
+
+/* ── LAYOUT ── */
+.app{display:none;height:100vh;overflow:hidden;}
+.topbar{height:56px;background:var(--dark);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:fixed;top:0;left:0;right:0;z-index:100;}
+.topbar-logo{height:36px;}
+.topbar-spacer{flex:1;}
+.topbar-user{font-size:13px;color:var(--grey);}
+.topbar-btn{background:none;border:1px solid var(--border);color:var(--white);padding:6px 14px;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.topbar-btn:hover{border-color:var(--gold);color:var(--gold);}
+.menu-toggle{background:none;border:none;color:var(--white);font-size:22px;cursor:pointer;display:none;}
+
+.sidebar{width:240px;background:var(--dark);border-right:1px solid var(--border);position:fixed;top:56px;bottom:0;left:0;overflow-y:auto;z-index:90;transition:transform .3s;}
+.sb-sec{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--grey);padding:20px 20px 8px;font-weight:600;}
+.ni{padding:10px 20px;cursor:pointer;font-size:13px;color:var(--grey);display:flex;align-items:center;gap:10px;transition:all .15s;border-left:3px solid transparent;}
+.ni:hover{color:var(--white);background:rgba(255,255,255,0.03);}
+.ni.active{color:var(--gold);border-left-color:var(--gold);background:var(--gold-dim);}
+.ni-icon{width:20px;text-align:center;}
+
+.main{margin-left:240px;margin-top:56px;padding:28px;height:calc(100vh - 56px);overflow-y:auto;contain:layout;-webkit-overflow-scrolling:touch;}
+
+/* ── PAGES ── */
+.page{display:none;}
+.page.active{display:block;}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.ph h1{font-size:22px;font-weight:600;}
+.ph p{font-size:13px;color:var(--grey);margin-top:2px;}
+
+/* ── BUTTONS ── */
+.btn{border:none;padding:10px 18px;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-gold{background:var(--gold);color:var(--black);}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--white);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-sm{padding:7px 12px;font-size:12px;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+
+/* ── CARDS / STATS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;}
+.stat-n{font-size:28px;font-weight:700;color:var(--gold);}
+.stat-l{font-size:12px;color:var(--grey);margin-top:4px;}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{text-align:left;padding:12px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--grey);border-bottom:1px solid var(--border);font-weight:600;}
+.tbl td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.tbl tr:hover td{background:rgba(255,255,255,0.02);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-green{background:rgba(76,175,80,0.12);color:var(--green);}
+.badge-orange{background:rgba(255,152,0,0.12);color:var(--orange);}
+.badge-red{background:rgba(229,57,53,0.12);color:var(--red);}
+.badge-blue{background:rgba(76,143,175,0.12);color:var(--blue);}
+
+/* ── VEHICLE CARDS ── */
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+.vcard{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:transform .2s,border-color .2s;contain:layout style;will-change:transform;}
+.vcard:hover{border-color:var(--gold);transform:translateY(-2px);}
+.vcard-img{width:100%;height:180px;object-fit:cover;background:var(--dark);}
+.vcard-body{padding:18px;}
+.vcard-title{font-size:15px;font-weight:600;margin-bottom:4px;}
+.vcard-sub{font-size:12px;color:var(--grey);margin-bottom:12px;}
+.vcard-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.vcard-price{font-size:20px;font-weight:700;color:var(--gold);}
+.vcard-margin{font-size:12px;color:var(--green);font-weight:600;}
+.vcard-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--dark);border:1px solid var(--border);border-radius:10px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:28px;}
+.modal-wide{max-width:800px;}
+.modal h2{font-size:18px;font-weight:600;margin-bottom:20px;}
+.fi{margin-bottom:14px;}
+.fi label{display:block;font-size:12px;color:var(--grey);margin-bottom:5px;font-weight:500;}
+.fi input,.fi select,.fi textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;padding:10px 14px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--gold);}
+.fi textarea{min-height:80px;resize:vertical;}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ── AI IMPORT ── */
+.ai-import-box{background:var(--gold-dim);border:1px solid var(--border);border-radius:6px;padding:18px;margin-bottom:18px;}
+.ai-title{font-size:13px;font-weight:500;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.ai-import-row{display:flex;gap:8px;}
+.ai-import-row input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.ai-import-row input:focus{border-color:var(--gold);}
+.ai-import-btn{background:var(--gold);color:var(--black);border:none;padding:10px 18px;border-radius:3px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.ai-import-btn:disabled{opacity:.6;cursor:not-allowed;}
+.ai-status{margin-top:10px;font-size:13px;color:var(--grey);display:none;align-items:center;gap:8px;}
+.ai-status.show{display:flex;}
+.ai-spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:aispin .8s linear infinite;flex-shrink:0;}
+@keyframes aispin{to{transform:rotate(360deg);}}
+.ai-status.error{color:var(--red);}
+.ai-status.success{color:var(--green);}
+
+/* ── WHATSAPP ── */
+.wa-btn{background:#25D366;color:#fff;border:none;padding:8px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.wa-btn:hover{background:#1ebe5a;transform:translateY(-1px);}
+
+/* ── FICHA / PDF ── */
+.ficha-btn{background:var(--blue);color:#fff;border:none;padding:8px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;}
+.ficha-btn:hover{background:#3a7d9e;}
+
+/* ── FICHA OVERLAY ── */
+.ficha-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:300;padding:16px;}
+.ficha-overlay.show{display:flex;}
+.ficha-container{background:#fff;color:#111;border-radius:10px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;padding:32px;}
+.ficha-container h3{font-size:18px;margin-bottom:4px;}
+.ficha-sub{font-size:12px;color:#888;margin-bottom:20px;}
+.fr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:13px;}
+.fr .l{color:#555;}
+.fr.tot{border-top:2px solid #111;border-bottom:none;padding-top:12px;margin-top:8px;font-weight:700;font-size:15px;}
+.fr.tot .v{color:var(--gold);}
+.ficha-note{background:#f8f5ec;border-radius:6px;padding:12px;margin-top:16px;font-size:12px;color:#555;}
+.ficha-actions{display:flex;gap:10px;margin-top:20px;justify-content:center;}
+
+/* ── DOCS ── */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+.doc-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;contain:layout style;}
+.doc-card h4{font-size:14px;margin-bottom:4px;}
+.doc-card .doc-sub{font-size:12px;color:var(--grey);margin-bottom:14px;}
+.doc-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;}
+.doc-item:last-child{border-bottom:none;}
+.doc-status{font-size:11px;font-weight:600;}
+.doc-status.ok{color:var(--green);}
+.doc-status.pending{color:var(--orange);}
+.doc-status.missing{color:var(--red);}
+
+/* ── CALC ── */
+.calc-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;max-width:600px;}
+.calc-result{background:var(--gold-dim);border:1px solid var(--border);border-radius:8px;padding:20px;margin-top:20px;}
+.calc-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;}
+.calc-row .cl{color:var(--grey);}
+.calc-row.total{border-top:2px solid var(--gold);margin-top:8px;padding-top:12px;font-weight:700;font-size:16px;}
+.calc-row.total .cv{color:var(--gold);}
+.calc-row.margin{color:var(--green);font-weight:600;font-size:14px;margin-top:4px;}
+
+/* ── TOGGLE ── */
+.toggle-box{display:flex;align-items:center;justify-content:space-between;background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.25);border-radius:6px;padding:12px 16px;margin-top:16px;gap:12px;}
+.toggle-label{font-size:13px;font-weight:600;color:var(--green);}
+.toggle-sub{font-size:11px;color:var(--grey);margin-top:2px;}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;background:var(--border);border-radius:24px;cursor:pointer;transition:.3s;}
+.toggle-thumb{position:absolute;left:3px;bottom:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.3s;cursor:pointer;}
+.toggle-switch input:checked+.toggle-track{background:var(--green);}
+.toggle-switch input:checked+.toggle-track+.toggle-thumb{left:23px;}
+
+/* ── ISV SIM ── */
+.isv-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;max-width:600px;}
+.isv-result{background:rgba(229,57,53,0.08);border:1px solid rgba(229,57,53,0.2);border-radius:8px;padding:20px;margin-top:20px;text-align:center;}
+.isv-val{font-size:32px;font-weight:700;color:var(--red);}
+.isv-note{font-size:12px;color:var(--grey);margin-top:8px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:14px 24px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .menu-toggle{display:block;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .stats{grid-template-columns:1fr 1fr;}
+  .vgrid{grid-template-columns:1fr;}
+  .fi-row{grid-template-columns:1fr;}
+  .modal{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast" class="toast"></div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <img id="loginLogo" class="login-logo" src="" alt="GermanImport" decoding="async">
+    <div id="loginLogoText" style="font-size:28px;font-weight:700;color:var(--gold);margin-bottom:4px;">GermanImport</div>
+    <p class="login-sub">Plataforma B2B de Importacao Automovel</p>
+    <!-- TABS Admin / Stand -->
+    <div style="display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+      <button id="tabAdmin" class="login-tab active" onclick="switchLoginTab('admin')">Administracao</button>
+      <button id="tabStand" class="login-tab" onclick="switchLoginTab('stand')">Painel Stand</button>
+    </div>
+    <input id="lEmail" class="login-field" type="email" placeholder="Email">
+    <input id="lPass" class="login-field" type="password" placeholder="Password">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div id="lError" class="login-error">Credenciais invalidas</div>
+    <div id="loginHint" style="margin-top:16px;font-size:11px;color:var(--grey);background:rgba(255,255,255,0.03);border-radius:6px;padding:10px;">
+      <strong style="color:var(--gold);">Demo Admin:</strong> admin@germanimport.pt / admin123
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app" class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="menu-toggle" onclick="toggleSidebar()">&#9776;</button>
+    <img id="topLogo" class="topbar-logo" src="" alt="GermanImport" decoding="async">
+    <div class="topbar-spacer"></div>
+    <span id="topUser" class="topbar-user"></span>
+    <button class="topbar-btn" onclick="doLogout()">Sair</button>
+  </div>
+
+  <!-- SIDEBAR (built by JS) -->
+  <div id="sidebar" class="sidebar"></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- ══ ADMIN PAGES ══ -->
+    <div class="page" id="pg-dashboard">
+      <div class="ph"><div><h1>Dashboard</h1><p>Visao geral da plataforma</p></div></div>
+      <div id="dashStats" class="stats"></div>
+      <h3 style="font-size:15px;margin-bottom:14px;">Ultimas Atividades</h3>
+      <div id="dashActivity"></div>
+    </div>
+
+    <div class="page" id="pg-veiculos">
+      <div class="ph">
+        <div><h1>Veiculos</h1><p>Gestao do catalogo</p></div>
+        <button class="btn btn-gold" onclick="openVehicleModal()">+ Novo Veiculo</button>
+      </div>
+      <div class="tbar" style="display:flex;gap:8px;margin-bottom:18px;">
+        <button class="btn btn-ghost btn-sm" onclick="filterVehicles('all')">Todos</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterVehicles('Disponivel')">Disponiveis</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterVehicles('Reservado')">Reservados</button>
+      </div>
+      <div id="vehicleGrid" class="vgrid"></div>
+    </div>
+
+    <div class="page" id="pg-stands">
+      <div class="ph"><div><h1>Stands Parceiros</h1><p>Gestao de parceiros registados</p></div></div>
+      <table class="tbl" id="standsTable">
+        <thead><tr><th>Nome</th><th>Contacto</th><th>Localidade</th><th>Estado</th><th>Acoes</th></tr></thead>
+        <tbody id="standsTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="page" id="pg-reservas">
+      <div class="ph"><div><h1>Reservas</h1><p>Gestao de reservas ativas</p></div></div>
+      <table class="tbl">
+        <thead><tr><th>Veiculo</th><th>Stand</th><th>Data</th><th>Expira</th><th>Estado</th></tr></thead>
+        <tbody id="reservasTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="page" id="pg-calc">
+      <div class="ph"><div><h1>Calculadora de Importacao</h1><p>Simule custos e margens</p></div></div>
+      <div id="calcContent"></div>
+    </div>
+
+    <div class="page" id="pg-isv">
+      <div class="ph"><div><h1>Simulador ISV</h1><p>Calcule o ISV estimado</p></div></div>
+      <div id="isvContent"></div>
+    </div>
+
+    <div class="page" id="pg-docs">
+      <div class="ph"><div><h1>Documentacao</h1><p>Documentos por veiculo</p></div></div>
+      <div id="docsGrid" class="doc-grid"></div>
+    </div>
+
+    <div class="page" id="pg-tracking">
+      <div class="ph"><div><h1>Seguimento de Entrega</h1><p>Acompanhe o estado de cada veiculo</p></div></div>
+      <div id="trackingGrid" class="doc-grid"></div>
+    </div>
+
+    <!-- ══ STAND PAGES ══ -->
+    <div class="page" id="pg-oportunidades">
+      <div class="ph"><div><h1>Oportunidades</h1><p>Veiculos disponiveis para importacao</p></div></div>
+      <div id="standVehicleGrid" class="vgrid"></div>
+    </div>
+
+    <div class="page" id="pg-minhasReservas">
+      <div class="ph"><div><h1>Minhas Reservas</h1><p>As suas reservas ativas</p></div></div>
+      <table class="tbl">
+        <thead><tr><th>Veiculo</th><th>Data</th><th>Expira</th><th>Estado</th></tr></thead>
+        <tbody id="minhasResTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="page" id="pg-standCalc">
+      <div class="ph"><div><h1>Calculadora de Importacao</h1><p>Simule custos e margens para o seu negocio</p></div></div>
+      <div id="standCalcContent"></div>
+    </div>
+
+    <div class="page" id="pg-standIsv">
+      <div class="ph"><div><h1>Simulador ISV</h1><p>Calcule o ISV estimado</p></div></div>
+      <div id="standIsvContent"></div>
+    </div>
+
+    <div class="page" id="pg-standDocs">
+      <div class="ph"><div><h1>Documentacao</h1><p>Documentos dos seus veiculos</p></div></div>
+      <div id="standDocsGrid" class="doc-grid"></div>
+    </div>
+
+    <div class="page" id="pg-standTracking">
+      <div class="ph"><div><h1>Seguimento de Entrega</h1><p>Acompanhe o estado do seu veiculo</p></div></div>
+      <div id="standTrackingGrid" class="doc-grid"></div>
+    </div>
+
+    <div class="page" id="pg-guia">
+      <div class="ph"><div><h1>Guia do Parceiro</h1><p>Como funciona o processo de importacao</p></div></div>
+      <div id="guiaContent"></div>
+    </div>
+
+    <div class="page" id="pg-perfil">
+      <div class="ph"><div><h1>Meu Perfil</h1><p>Dados do seu stand</p></div></div>
+      <div id="perfilContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VEHICLE MODAL ═══ -->
+<div id="vehicleModal" class="modal-bg">
+  <div class="modal modal-wide">
+    <h2 id="vModalTitle">Novo Veiculo</h2>
+    <div class="ai-import-box">
+      <div class="ai-title">Importar via Link (AutoScout24 / Mobile.de)</div>
+      <div class="ai-import-row">
+        <input id="aiUrl" type="text" placeholder="Cole o link do anuncio...">
+        <button class="ai-import-btn" id="aiBtn" onclick="importFromUrl()">Importar</button>
+      </div>
+      <div id="aiStatus" class="ai-status"><div class="ai-spinner" id="aiSpinner"></div><span id="aiStatusText"></span></div>
+    </div>
+    <input type="hidden" id="vEditId" value="">
+    <div class="fi-row">
+      <div class="fi"><label>Marca</label><input id="vMarca" placeholder="Ex: Mercedes"></div>
+      <div class="fi"><label>Modelo</label><input id="vModelo" placeholder="Ex: A 250e AMG Line"></div>
+    </div>
+    <div class="fi-row">
+      <div class="fi"><label>Ano</label><input id="vAno" type="number" placeholder="2020"></div>
+      <div class="fi"><label>Quilometros</label><input id="vKm" type="number" placeholder="64351"></div>
+    </div>
+    <div class="fi-row">
+      <div class="fi"><label>Combustivel</label>
+        <select id="vComb"><option>Gasolina</option><option>Diesel</option><option selected>Hibrido Plug-In</option><option>Eletrico</option></select>
+      </div>
+      <div class="fi"><label>Transmissao</label>
+        <select id="vTrans"><option selected>Automatica</option><option>Manual</option></select>
+      </div>
+    </div>
+    <div class="fi-row">
+      <div class="fi"><label>Cor</label><input id="vCor" placeholder="Preto"></div>
+      <div class="fi"><label>URL da Foto</label><input id="vImg" placeholder="https://..."></div>
+    </div>
+    <div class="fi"><label>Descricao / Equipamentos</label><textarea id="vDesc" placeholder="Interior em pele, LED, navegacao..."></textarea></div>
+    <hr style="border-color:var(--border);margin:20px 0;">
+    <h3 style="font-size:15px;margin-bottom:16px;">Valores</h3>
+    <div class="fi-row">
+      <div class="fi"><label>Preco Real Alemanha (c/IVA DE)</label><input id="vPrecoReal" type="number" value="21850"></div>
+      <div class="fi"><label>Transporte DE-PT</label><input id="vTransp" type="number" value="900"></div>
+    </div>
+    <div class="fi-row">
+      <div class="fi"><label>Inspecao DEKRA</label><input id="vDekra" type="number" value="130"></div>
+      <div class="fi"><label>Legalizacao IMT</label><input id="vLegal" type="number" value="200"></div>
+    </div>
+    <div class="fi-row">
+      <div class="fi"><label>Servico GermanImport</label><input id="vServico" type="number" value="2000"></div>
+      <div class="fi"><label>ISV Estimado</label><input id="vIsv" type="number" value="245"></div>
+    </div>
+    <div class="fi"><label>PVP Recomendado (mercado PT c/IVA)</label><input id="vPvp" type="number" value="28900"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn btn-gold" onclick="saveVehicle()">Guardar</button>
+      <button class="btn btn-ghost" onclick="closeModal('vehicleModal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FICHA OVERLAY ═══ -->
+<div id="fichaOverlay" class="ficha-overlay" onclick="if(event.target===this)closeFicha()">
+  <div id="fichaContainer" class="ficha-container"></div>
+</div>
+
+<script>
+// Logo loaded as external file
+// ===============================================
+// GERMANIMPORT BACKOFFICE - VERSAO ESTAVEL
+// Valores BLOQUEADOS - nao alterar sem aprovacao
+// ===============================================
+
+// -- USERS --
+var USERS = [
+  {email:'admin@germanimport.pt', pass:'admin123', role:'admin', nome:'Admin GI'},
+  {email:'stand@teste.pt', pass:'stand123', role:'stand', nome:'Auto Premium Lda', sId:1}
+];
+var currentUser = null;
+
+// -- STANDS --
+var stands = [
+  {id:1, nome:'Auto Premium Lda', contacto:'912345678', email:'stand@teste.pt', localidade:'Lisboa', estado:'Aprovado'},
+  {id:2, nome:'Car Select Porto', contacto:'913456789', email:'carselect@email.com', localidade:'Porto', estado:'Pendente'}
+];
+
+// -- VEHICLES (BLOQUEADO) --
+var vehicles = [
+  {
+    id:1, marca:'Mercedes', modelo:'A 250e AMG Line', ano:2020, km:64351,
+    comb:'Hibrido Plug-In', trans:'Automatica', cor:'Preto',
+    desc:'Interior em pele, LED High Performance, navegacao MBUX, camera traseira, sensores, jantes 18 AMG',
+    img:'',
+    precoReal:21850, markup:0, preco:21850,
+    transp:900, dekra:130, legal:200, servico:2000, isv:245,
+    pvp:28900, status:'Disponivel'
+  }
+];
+
+// -- RESERVATIONS --
+var reservations = [
+  {id:1, vId:1, sId:1, data:'2026-03-20', expira:'2026-03-27', status:'Ativa'}
+];
+
+// -- DOCUMENTS PER VEHICLE --
+var DOC_TYPES = [
+  'Relatorio DEKRA',
+  'Relatorio COC',
+  'Contrato de Aquisicao',
+  'Fatura do Veiculo',
+  'Documentacao Legalizacao DE',
+  'Documentos IMT Portugal'
+];
+// Map each document to its tracking step
+var DOC_STEP_MAP = {
+  'Relatorio DEKRA': 'dekra',
+  'Relatorio COC': 'dekra',
+  'Contrato de Aquisicao': 'aquisicao',
+  'Fatura do Veiculo': 'aquisicao',
+  'Documentacao Legalizacao DE': 'documentacaoDE',
+  'Documentos IMT Portugal': 'legalizacao'
+};
+// Phase labels for grouping
+var DOC_PHASES = [
+  {key:'dekra', label:'Fase 1 - Validacao Tecnica (DEKRA)'},
+  {key:'aquisicao', label:'Fase 2 - Aquisicao na Alemanha'},
+  {key:'documentacaoDE', label:'Fase 3 - Documentacao Alema'},
+  {key:'legalizacao', label:'Fase 4 - Legalizacao Portugal'}
+];
+var vehicleDocs = {};
+// Init docs for vehicle 1
+vehicleDocs[1] = {};
+DOC_TYPES.forEach(function(dt){ vehicleDocs[1][dt] = {status:'pending', url:'', date:''}; });
+vehicleDocs[1]['Relatorio DEKRA'] = {status:'ok', url:'#', date:'2026-03-15'};
+vehicleDocs[1]['Fatura do Veiculo'] = {status:'ok', url:'#', date:'2026-03-18'};
+
+// -- MARKET DATA (calibrado Standvirtual) --
+var MKT = {
+  brand:{Mercedes:1.08, BMW:1.05, Audi:1.04, Volkswagen:0.95, Porsche:1.15, default:1.0},
+  segment:{Compacto:1.0, Sedan:1.02, SUV:1.08, Coupe:1.06, Carrinha:0.98, default:1.0},
+  fuel:{'Hibrido Plug-In':1.05, Eletrico:1.08, Diesel:0.98, Gasolina:1.0, default:1.0},
+  km:function(k){if(k<50000)return 1.08;if(k<80000)return 1.03;if(k<120000)return 0.97;return 0.90;},
+  age:function(a){var y=2026-a;if(y<=2)return 1.10;if(y<=4)return 1.04;if(y<=6)return 0.97;return 0.90;}
+};
+
+// === CALCULATION FUNCTIONS (BLOQUEADAS) ===
+var _domCache={};
+function g(id){
+  var el=_domCache[id];
+  if(el&&document.body.contains(el))return el;
+  el=document.getElementById(id);
+  if(el)_domCache[id]=el;
+  return el;
+}
+function fmt(n){return n?n.toLocaleString('pt-PT'):'0';}
+
+function semIva(v){return Math.round((v.preco||v.precoReal)/1.19);}
+function cTotal(v){return semIva(v) + v.transp + v.dekra + v.legal + v.servico;}
+function ivaViatura(v){return Math.round((semIva(v) + v.transp) * 0.23);}
+function cTotalMercado(v){return cTotal(v) + ivaViatura(v) + v.isv;}
+function cMargin(v){return v.pvp - cTotalMercado(v);}
+function pvpFinal(v){return v.pvp;}
+
+// === LOGIN ===
+var loginRole = 'admin';
+function switchLoginTab(role){
+  loginRole = role;
+  g('tabAdmin').classList.toggle('active', role==='admin');
+  g('tabStand').classList.toggle('active', role==='stand');
+  if(role==='admin'){
+    g('lEmail').value='admin@germanimport.pt';
+    g('loginHint').innerHTML='<strong style="color:var(--gold);">Demo Admin:</strong> admin@germanimport.pt / admin123';
+  } else {
+    g('lEmail').value='stand@teste.pt';
+    g('loginHint').innerHTML='<strong style="color:var(--gold);">Demo Stand:</strong> stand@teste.pt / stand123';
+  }
+  g('lPass').value='';
+  g('lError').style.display='none';
+}
+function doLogin(){
+  var email = g('lEmail').value.trim();
+  var pass = g('lPass').value;
+  var user = USERS.find(function(u){return u.email===email && u.pass===pass;});
+  if(!user){g('lError').style.display='block';return;}
+  g('lError').style.display='none';
+  currentUser = user;
+  g('loginOverlay').style.display='none';
+  g('app').style.display='flex';
+  g('app').style.flexDirection='column';
+  g('topUser').textContent=user.nome;
+  buildSidebar();
+  if(user.role==='admin'){showPage('dashboard');}
+  else{showPage('oportunidades');}
+}
+function doLogout(){
+  currentUser=null;
+  g('loginOverlay').style.display='flex';
+  g('app').style.display='none';
+  g('lEmail').value='';g('lPass').value='';
+}
+
+// === SIDEBAR ===
+function buildSidebar(){
+  var sb=g('sidebar');
+  var h='';
+  if(currentUser.role==='admin'){
+    h+='<div class="sb-sec">Plataforma</div>';
+    h+='<div class="ni active" onclick="showPage(\'dashboard\',this)"><span class="ni-icon">D</span> Dashboard</div>';
+    h+='<div class="ni" onclick="showPage(\'veiculos\',this)"><span class="ni-icon">V</span> Veiculos</div>';
+    h+='<div class="ni" onclick="showPage(\'stands\',this)"><span class="ni-icon">S</span> Stands</div>';
+    h+='<div class="ni" onclick="showPage(\'reservas\',this)"><span class="ni-icon">R</span> Reservas</div>';
+    h+='<div class="sb-sec">Ferramentas</div>';
+    h+='<div class="ni" onclick="showPage(\'calc\',this);buildCalc()"><span class="ni-icon">C</span> Calculadora</div>';
+    h+='<div class="ni" onclick="showPage(\'isv\',this);buildISV(\'isvContent\')"><span class="ni-icon">I</span> Simulador ISV</div>';
+    h+='<div class="ni" onclick="showPage(\'docs\',this);renderDocs()"><span class="ni-icon">D</span> Documentacao</div>';
+    h+='<div class="ni" onclick="showPage(\'tracking\',this);renderTracking()"><span class="ni-icon">T</span> Seguimento</div>';
+  } else {
+    h+='<div class="sb-sec">Meu Painel</div>';
+    h+='<div class="ni active" onclick="showPage(\'oportunidades\',this)"><span class="ni-icon">O</span> Oportunidades</div>';
+    h+='<div class="ni" onclick="showPage(\'minhasReservas\',this);renderMinhasReservas()"><span class="ni-icon">R</span> Minhas Reservas</div>';
+    h+='<div class="sb-sec">Ferramentas</div>';
+    h+='<div class="ni" onclick="showPage(\'standCalc\',this);buildStandCalc()"><span class="ni-icon">C</span> Calculadora</div>';
+    h+='<div class="ni" onclick="showPage(\'standIsv\',this);buildISV(\'standIsvContent\')"><span class="ni-icon">I</span> Simulador ISV</div>';
+    h+='<div class="ni" onclick="showPage(\'standDocs\',this);renderStandDocs()"><span class="ni-icon">D</span> Documentacao</div>';
+    h+='<div class="ni" onclick="showPage(\'standTracking\',this);renderStandTracking()"><span class="ni-icon">T</span> Seguimento</div>';
+    h+='<div class="sb-sec">Apoio</div>';
+    h+='<div class="ni" onclick="showPage(\'guia\',this);buildGuia()"><span class="ni-icon">G</span> Guia do Parceiro</div>';
+    h+='<div class="ni" onclick="showPage(\'perfil\',this);buildPerfil()"><span class="ni-icon">P</span> Meu Perfil</div>';
+  }
+  sb.innerHTML=h;
+}
+
+var _currentPage=null;
+var _currentNav=null;
+function showPage(id,el){
+  if(_currentPage){_currentPage.classList.remove('active');}
+  var pg=g('pg-'+id);
+  if(pg){pg.classList.add('active');_currentPage=pg;}
+  if(el){
+    if(_currentNav){_currentNav.classList.remove('active');}
+    el.classList.add('active');_currentNav=el;
+  }
+  // auto-render
+  if(id==='dashboard')renderDashboard();
+  else if(id==='veiculos')renderVehicles();
+  else if(id==='stands')renderStands();
+  else if(id==='reservas')renderReservas();
+  else if(id==='oportunidades')renderStandVehicles();
+  closeSidebar();
+}
+function toggleSidebar(){g('sidebar').classList.toggle('open');}
+function closeSidebar(){g('sidebar').classList.remove('open');}
+
+// === TOAST ===
+function showToast(msg){
+  var t=g('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+// === MODAL HELPERS ===
+function closeModal(id){g(id).classList.remove('show');}
+function closeFicha(){g('fichaOverlay').classList.remove('show');}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    closeModal('vehicleModal');
+    closeFicha();
+  }
+});
+
+// === DASHBOARD ===
+function renderDashboard(){
+  var avail=vehicles.filter(function(v){return v.status==='Disponivel';}).length;
+  var res=reservations.filter(function(r){return r.status==='Ativa';}).length;
+  var aprov=stands.filter(function(s){return s.estado==='Aprovado';}).length;
+  var pend=stands.filter(function(s){return s.estado==='Pendente';}).length;
+  g('dashStats').innerHTML=
+    '<div class="stat"><div class="stat-n">'+vehicles.length+'</div><div class="stat-l">Veiculos Total</div></div>'+
+    '<div class="stat"><div class="stat-n" style="color:var(--green)">'+avail+'</div><div class="stat-l">Disponiveis</div></div>'+
+    '<div class="stat"><div class="stat-n" style="color:var(--blue)">'+res+'</div><div class="stat-l">Reservas Ativas</div></div>'+
+    '<div class="stat"><div class="stat-n">'+aprov+'</div><div class="stat-l">Stands Aprovados</div></div>'+
+    '<div class="stat"><div class="stat-n" style="color:var(--orange)">'+pend+'</div><div class="stat-l">Stands Pendentes</div></div>';
+  g('dashActivity').innerHTML='<div style="color:var(--grey);font-size:13px;">Sem atividade recente.</div>';
+}
+
+// === VEHICLES RENDER ===
+function renderVehicles(filter){
+  var list=filter&&filter!=='all'?vehicles.filter(function(v){return v.status===filter;}):vehicles;
+  var h='';
+  list.forEach(function(v){
+    var margin=cMargin(v);
+    var marginColor=margin>0?'var(--green)':'var(--red)';
+    h+='<div class="vcard">';
+    h+='<div class="vcard-img" style="'+(v.img?'background:url('+v.img+') center/cover':'display:flex;align-items:center;justify-content:center;color:var(--grey);font-size:13px;')+'">'+(!v.img?v.marca+' '+v.modelo:'')+'</div>';
+    h+='<div class="vcard-body">';
+    h+='<div class="vcard-title">'+v.marca+' '+v.modelo+'</div>';
+    h+='<div class="vcard-sub">'+v.ano+' | '+fmt(v.km)+' km | '+v.comb+'</div>';
+    h+='<div class="vcard-row"><span class="vcard-price">EUR '+fmt(pvpFinal(v))+'</span><span class="badge '+(v.status==='Disponivel'?'badge-green':'badge-blue')+'">'+v.status+'</span></div>';
+    h+='<div class="vcard-row"><span style="font-size:12px;color:var(--grey)">Custo: EUR '+fmt(cTotalMercado(v))+'</span><span style="font-size:12px;font-weight:600;color:'+marginColor+'">Margem: EUR '+fmt(margin)+'</span></div>';
+    h+='<div class="vcard-actions">';
+    h+='<button class="ficha-btn" onclick="gerarFicha('+v.id+')">Ficha</button>';
+    h+='<button class="wa-btn" onclick="shareWhatsApp('+v.id+')">WhatsApp</button>';
+    h+='<button class="btn btn-ghost btn-sm" onclick="editVehicle('+v.id+')">Editar</button>';
+    h+='</div></div></div>';
+  });
+  g('vehicleGrid').innerHTML=h||'<div style="color:var(--grey)">Sem veiculos.</div>';
+}
+function filterVehicles(f){renderVehicles(f);}
+
+// === STAND VEHICLES ===
+function renderStandVehicles(){
+  var list=vehicles.filter(function(v){return v.status==='Disponivel';});
+  var h='';
+  list.forEach(function(v){
+    var margin=cMargin(v);
+    h+='<div class="vcard">';
+    h+='<div class="vcard-img" style="'+(v.img?'background:url('+v.img+') center/cover':'display:flex;align-items:center;justify-content:center;color:var(--grey);font-size:13px;')+'">'+(!v.img?v.marca+' '+v.modelo:'')+'</div>';
+    h+='<div class="vcard-body">';
+    h+='<div class="vcard-title">'+v.marca+' '+v.modelo+'</div>';
+    h+='<div class="vcard-sub">'+v.ano+' | '+fmt(v.km)+' km | '+v.comb+'</div>';
+    h+='<div class="vcard-row"><span class="vcard-price">EUR '+fmt(pvpFinal(v))+'</span><span class="badge badge-green">'+v.status+'</span></div>';
+    h+='<div class="vcard-row"><span style="font-size:12px;color:var(--grey)">Custo total: EUR '+fmt(cTotalMercado(v))+'</span><span style="font-size:12px;font-weight:600;color:var(--green)">Margem: EUR '+fmt(margin)+'</span></div>';
+    h+='<div class="vcard-actions">';
+    h+='<button class="ficha-btn" onclick="gerarFicha('+v.id+')">Ver Ficha</button>';
+    h+='<button class="wa-btn" onclick="shareWhatsApp('+v.id+')">WhatsApp</button>';
+    h+='<button class="btn btn-gold btn-sm" onclick="reservarVeiculo('+v.id+')">Reservar</button>';
+    h+='</div></div></div>';
+  });
+  g('standVehicleGrid').innerHTML=h||'<div style="color:var(--grey)">Sem oportunidades disponiveis.</div>';
+}
+
+// === FICHA (PDF-STYLE) ===
+function gerarFicha(vid){
+  var v=vehicles.find(function(x){return x.id===vid;});
+  if(!v){showToast('Veiculo nao encontrado');return;}
+  var si=semIva(v);
+  var iva=ivaViatura(v);
+  var tot=cTotalMercado(v);
+  var margin=cMargin(v);
+
+  var h='';
+  h+='<div style="text-align:center;margin-bottom:20px;">';
+  h+='<div style="font-size:22px;font-weight:700;color:#c8a24e;">GermanImport</div>';
+  h+='<div style="font-size:11px;color:#888;">Ficha Tecnica e Financeira</div>';
+  h+='</div>';
+  h+='<h3>'+v.marca+' '+v.modelo+'</h3>';
+  h+='<div class="ficha-sub">'+v.ano+' | '+fmt(v.km)+' km | '+v.comb+' | '+v.trans+'</div>';
+
+  if(v.desc){
+    h+='<div style="background:#f5f5f5;border-radius:6px;padding:12px;font-size:12px;color:#555;margin-bottom:20px;">'+v.desc+'</div>';
+  }
+
+  h+='<div style="font-size:13px;font-weight:600;margin-bottom:10px;">Breakdown de Custos</div>';
+  h+='<div class="fr"><span class="l">Veiculo DE (preco lista c/IVA)</span><span style="color:#888">EUR '+fmt(v.preco)+'</span></div>';
+  h+='<div class="fr"><span class="l">Veiculo DE (sem IVA -19%)</span><span style="color:#4caf50">EUR '+fmt(si)+'</span></div>';
+  h+='<div class="fr"><span class="l">Transporte DE-PT</span><span>EUR '+fmt(v.transp)+'</span></div>';
+  h+='<div class="fr"><span class="l">Inspecao DEKRA</span><span>EUR '+fmt(v.dekra)+'</span></div>';
+  h+='<div class="fr"><span class="l">Legalizacao IMT</span><span>EUR '+fmt(v.legal)+'</span></div>';
+  h+='<div class="fr"><span class="l">Servico GermanImport</span><span>EUR '+fmt(v.servico)+'</span></div>';
+  h+='<div class="fr" style="font-weight:600;"><span class="l">Custo Stand (sem IVA PT)</span><span>EUR '+fmt(cTotal(v))+'</span></div>';
+  h+='<div class="fr"><span class="l">IVA 23% PT (viatura+transp)</span><span style="color:#ff9800">EUR '+fmt(iva)+'</span></div>';
+  h+='<div class="fr"><span class="l">ISV</span><span>EUR '+fmt(v.isv)+'</span></div>';
+  h+='<div class="fr tot"><span class="l">Custo Total Mercado</span><span class="v">EUR '+fmt(tot)+'</span></div>';
+
+  h+='<div style="display:flex;justify-content:space-between;margin-top:16px;padding:14px;background:#f0faf0;border-radius:8px;">';
+  h+='<div><div style="font-size:11px;color:#888;">PVP Recomendado</div><div style="font-size:20px;font-weight:700;color:#c8a24e;">EUR '+fmt(pvpFinal(v))+'</div></div>';
+  h+='<div style="text-align:right;"><div style="font-size:11px;color:#888;">Margem Estimada</div><div style="font-size:20px;font-weight:700;color:'+(margin>0?'#4caf50':'#e53935')+';">EUR '+fmt(margin)+'</div></div>';
+  h+='</div>';
+
+  h+='<div class="ficha-note">';
+  h+='<strong>Nota IVA:</strong> Para stands com CAE automovel, o IVA de EUR '+fmt(iva)+' e dedutivel. Nesse caso o custo efetivo e EUR '+fmt(cTotal(v)+v.isv)+' e a margem real e EUR '+fmt(v.pvp - cTotal(v) - v.isv)+'.';
+  h+='</div>';
+
+  h+='<div class="ficha-actions">';
+  h+='<button onclick="printFicha()" style="background:#c8a24e;color:#111;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Imprimir / PDF</button>';
+  h+='<button onclick="closeFicha()" style="background:#eee;color:#333;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Fechar</button>';
+  h+='</div>';
+
+  g('fichaContainer').innerHTML=h;
+  g('fichaOverlay').classList.add('show');
+}
+
+function printFicha(){
+  var content=g('fichaContainer').innerHTML;
+  var win=window.open('','_blank');
+  win.document.write('<html><head><title>Ficha GermanImport</title>');
+  win.document.write('<style>body{font-family:DM Sans,Arial,sans-serif;padding:40px;color:#111;max-width:600px;margin:auto;}.fr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:13px;}.fr .l{color:#555;}.fr.tot{border-top:2px solid #111;border-bottom:none;padding-top:12px;margin-top:8px;font-weight:700;font-size:15px;}.ficha-note{background:#f8f5ec;border-radius:6px;padding:12px;margin-top:16px;font-size:12px;color:#555;}.ficha-actions{display:none;}</style>');
+  win.document.write('</head><body>');
+  win.document.write(content);
+  win.document.write('</body></html>');
+  win.document.close();
+  win.print();
+}
+
+// === WHATSAPP SHARE ===
+function shareWhatsApp(vid){
+  var v=vehicles.find(function(x){return x.id===vid;});
+  if(!v){showToast('Veiculo nao encontrado');return;}
+  var margin=cMargin(v);
+  var msg='*GermanImport - Oportunidade*\n\n';
+  msg+='*'+v.marca+' '+v.modelo+'*\n';
+  msg+=v.ano+' | '+fmt(v.km)+' km | '+v.comb+'\n\n';
+  msg+='Custo total: EUR '+fmt(cTotalMercado(v))+'\n';
+  msg+='PVP recomendado: EUR '+fmt(pvpFinal(v))+'\n';
+  msg+='Margem estimada: EUR '+fmt(margin)+'\n\n';
+  msg+='_Disponivel para reserva imediata_\n';
+  msg+='Contacte-nos para mais informacoes.';
+  var url='https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
+
+// === VEHICLE MODAL ===
+function openVehicleModal(){
+  g('vModalTitle').textContent='Novo Veiculo';
+  g('vEditId').value='';
+  g('vMarca').value='';g('vModelo').value='';g('vAno').value='';g('vKm').value='';
+  g('vComb').value='Hibrido Plug-In';g('vTrans').value='Automatica';g('vCor').value='';
+  g('vImg').value='';g('vDesc').value='';
+  g('vPrecoReal').value=21850;g('vTransp').value=900;g('vDekra').value=130;
+  g('vLegal').value=200;g('vServico').value=2000;g('vIsv').value=245;g('vPvp').value=28900;
+  g('vehicleModal').classList.add('show');
+}
+function editVehicle(vid){
+  var v=vehicles.find(function(x){return x.id===vid;});
+  if(!v)return;
+  g('vModalTitle').textContent='Editar Veiculo';
+  g('vEditId').value=v.id;
+  g('vMarca').value=v.marca;g('vModelo').value=v.modelo;g('vAno').value=v.ano;g('vKm').value=v.km;
+  g('vComb').value=v.comb;g('vTrans').value=v.trans;g('vCor').value=v.cor;
+  g('vImg').value=v.img;g('vDesc').value=v.desc;
+  g('vPrecoReal').value=v.precoReal;g('vTransp').value=v.transp;g('vDekra').value=v.dekra;
+  g('vLegal').value=v.legal;g('vServico').value=v.servico;g('vIsv').value=v.isv;g('vPvp').value=v.pvp;
+  g('vehicleModal').classList.add('show');
+}
+function saveVehicle(){
+  var marca=g('vMarca').value.trim();
+  var modelo=g('vModelo').value.trim();
+  if(!marca||!modelo){showToast('Marca e modelo sao obrigatorios');return;}
+  var obj={
+    marca:marca, modelo:modelo, ano:parseInt(g('vAno').value)||2020, km:parseInt(g('vKm').value)||0,
+    comb:g('vComb').value, trans:g('vTrans').value, cor:g('vCor').value,
+    img:g('vImg').value, desc:g('vDesc').value,
+    precoReal:parseInt(g('vPrecoReal').value)||0, markup:0,
+    preco:parseInt(g('vPrecoReal').value)||0,
+    transp:parseInt(g('vTransp').value)||900, dekra:parseInt(g('vDekra').value)||130,
+    legal:parseInt(g('vLegal').value)||200, servico:parseInt(g('vServico').value)||2000,
+    isv:parseInt(g('vIsv').value)||245, pvp:parseInt(g('vPvp').value)||28900,
+    status:'Disponivel'
+  };
+  var editId=g('vEditId').value;
+  if(editId){
+    var idx=vehicles.findIndex(function(v){return v.id===parseInt(editId);});
+    if(idx>=0){obj.id=parseInt(editId);obj.status=vehicles[idx].status;vehicles[idx]=obj;}
+  } else {
+    obj.id=vehicles.length?Math.max.apply(null,vehicles.map(function(v){return v.id;}))+1:1;
+    vehicles.push(obj);
+    vehicleDocs[obj.id]={};
+    DOC_TYPES.forEach(function(dt){vehicleDocs[obj.id][dt]={status:'missing',url:'',date:''};});
+  }
+  closeModal('vehicleModal');
+  renderVehicles();
+  showToast('Veiculo guardado!');
+}
+
+// === AI IMPORT ===
+function importFromUrl(){
+  var url=g('aiUrl').value.trim();
+  if(!url){showToast('Cole um link primeiro');return;}
+  var btn=g('aiBtn');
+  var status=g('aiStatus');
+  var spinner=g('aiSpinner');
+  var statusText=g('aiStatusText');
+  btn.disabled=true;
+  spinner.style.display='block';
+  status.className='ai-status show';
+  statusText.textContent='A analisar o anuncio...';
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user',content:'Analisa este link de um anuncio de carro e extrai os dados em JSON: {marca, modelo, ano, km, comb (Gasolina/Diesel/Hibrido Plug-In/Eletrico), cor, trans (Automatica/Manual), desc, img (URL da foto), preco (numero inteiro em EUR)}. Apenas o JSON, sem texto adicional. Link: '+url}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text='';
+    if(data.content&&data.content[0])text=data.content[0].text||'';
+    var jsonMatch=text.match(/\{[\s\S]*\}/);
+    if(!jsonMatch)throw new Error('Nao foi possivel extrair dados.');
+    var d=JSON.parse(jsonMatch[0]);
+    if(d.marca)g('vMarca').value=d.marca;
+    if(d.modelo)g('vModelo').value=d.modelo;
+    if(d.ano)g('vAno').value=d.ano;
+    if(d.km)g('vKm').value=d.km;
+    if(d.comb)g('vComb').value=d.comb;
+    if(d.cor)g('vCor').value=d.cor;
+    if(d.trans)g('vTrans').value=d.trans;
+    if(d.desc)g('vDesc').value=d.desc;
+    if(d.img)g('vImg').value=d.img;
+    if(d.preco){
+      g('vPrecoReal').value=d.preco;
+      var isvEst=0;
+      if(d.comb==='Hibrido Plug-In')isvEst=245;
+      else if(d.comb==='Eletrico')isvEst=0;
+      else if(d.comb==='Diesel')isvEst=1500;
+      else isvEst=1200;
+      g('vIsv').value=isvEst;
+    }
+    spinner.style.display='none';
+    status.className='ai-status show success';
+    statusText.textContent='Dados importados com sucesso! Reveja os valores.';
+    btn.disabled=false;
+    showToast('Ficha preenchida automaticamente');
+  })
+  .catch(function(err){
+    spinner.style.display='none';
+    status.className='ai-status show error';
+    statusText.textContent='Erro: '+(err.message||'Tente preencher manualmente.');
+    btn.disabled=false;
+  });
+}
+
+// === STANDS ===
+function renderStands(){
+  var h='';
+  stands.forEach(function(s){
+    var bc=s.estado==='Aprovado'?'badge-green':'badge-orange';
+    h+='<tr><td>'+s.nome+'</td><td>'+s.contacto+'</td><td>'+s.localidade+'</td>';
+    h+='<td><span class="badge '+bc+'">'+s.estado+'</span></td>';
+    h+='<td>';
+    if(s.estado==='Pendente'){
+      h+='<button class="btn btn-green btn-sm" onclick="aprovarStand('+s.id+')">Aprovar</button>';
+    }
+    h+='</td></tr>';
+  });
+  g('standsTbody').innerHTML=h;
+}
+function aprovarStand(sid){
+  var s=stands.find(function(x){return x.id===sid;});
+  if(s){s.estado='Aprovado';renderStands();showToast('Stand aprovado!');}
+}
+
+// === RESERVAS ===
+function renderReservas(){
+  var h='';
+  reservations.forEach(function(r){
+    var v=vehicles.find(function(x){return x.id===r.vId;});
+    var s=stands.find(function(x){return x.id===r.sId;});
+    h+='<tr><td>'+(v?v.marca+' '+v.modelo:'-')+'</td><td>'+(s?s.nome:'-')+'</td>';
+    h+='<td>'+r.data+'</td><td>'+r.expira+'</td>';
+    h+='<td><span class="badge badge-green">'+r.status+'</span></td></tr>';
+  });
+  g('reservasTbody').innerHTML=h||'<tr><td colspan="5" style="color:var(--grey)">Sem reservas.</td></tr>';
+}
+function renderMinhasReservas(){
+  if(!currentUser)return;
+  var sId=currentUser.sId;
+  var myRes=reservations.filter(function(r){return r.sId===sId;});
+  var h='';
+  myRes.forEach(function(r){
+    var v=vehicles.find(function(x){return x.id===r.vId;});
+    h+='<tr><td>'+(v?v.marca+' '+v.modelo:'-')+'</td>';
+    h+='<td>'+r.data+'</td><td>'+r.expira+'</td>';
+    h+='<td><span class="badge badge-green">'+r.status+'</span></td></tr>';
+  });
+  g('minhasResTbody').innerHTML=h||'<tr><td colspan="4" style="color:var(--grey)">Sem reservas ativas.</td></tr>';
+}
+function reservarVeiculo(vid){
+  var v=vehicles.find(function(x){return x.id===vid;});
+  if(!v||!currentUser)return;
+  if(v.status==='Reservado'){showToast('Veiculo ja reservado');return;}
+  v.status='Reservado';
+  var hoje=new Date();
+  var exp=new Date(hoje);exp.setDate(exp.getDate()+7);
+  reservations.push({
+    id:reservations.length+1,vId:vid,sId:currentUser.sId||1,
+    data:hoje.toISOString().slice(0,10),expira:exp.toISOString().slice(0,10),status:'Ativa'
+  });
+  renderStandVehicles();
+  showToast('Veiculo reservado por 7 dias!');
+}
+
+// === DOCUMENTATION (with upload + phase grouping) ===
+function renderDocsCard(v, canUpload){
+  var docs=vehicleDocs[v.id]||{};
+  var tr=vehicleTracking[v.id]||{};
+  var total=DOC_TYPES.length;
+  var done=DOC_TYPES.filter(function(dt){return docs[dt]&&docs[dt].status==='ok';}).length;
+  var h='<div class="doc-card">';
+  h+='<h4>'+v.marca+' '+v.modelo+'</h4>';
+  h+='<div class="doc-sub">'+done+'/'+total+' documentos completos</div>';
+  // Group by phase
+  DOC_PHASES.forEach(function(phase){
+    var phaseDocs=DOC_TYPES.filter(function(dt){return DOC_STEP_MAP[dt]===phase.key;});
+    if(!phaseDocs.length)return;
+    var stepDone=tr[phase.key]&&tr[phase.key].done;
+    var phaseIcon=stepDone?'&#10003;':'&#8226;';
+    var phaseColor=stepDone?'var(--green)':'var(--gold)';
+    h+='<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);">';
+    h+='<div style="font-size:11px;color:'+phaseColor+';font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">';
+    h+='<span style="margin-right:4px;">'+phaseIcon+'</span>'+phase.label;
+    h+='</div>';
+    phaseDocs.forEach(function(dt){
+      var d=docs[dt]||{status:'missing'};
+      var sc=d.status==='ok'?'ok':(d.status==='pending'?'pending':'missing');
+      var sl=d.status==='ok'?'Completo':(d.status==='pending'?'Pendente':'Em falta');
+      h+='<div class="doc-item">';
+      h+='<span>'+dt+'</span>';
+      h+='<div style="display:flex;align-items:center;gap:8px;">';
+      h+='<span class="doc-status '+sc+'">'+sl+'</span>';
+      if(d.status==='ok'){
+        h+='<button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px;" onclick="showToast(\'Documento: '+dt+'\')">Ver</button>';
+      }
+      if(canUpload){
+        var fn=canUpload==='admin'?'uploadDoc':'uploadStandDoc';
+        h+='<label style="cursor:pointer;"><input type="file" style="display:none;" onchange="'+fn+'('+v.id+',\''+dt+'\',this)"><span class="btn btn-gold btn-sm" style="padding:4px 8px;font-size:11px;">Upload</span></label>';
+      }
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  return h;
+}
+function renderDocs(){
+  var h='';
+  vehicles.forEach(function(v){h+=renderDocsCard(v,'admin');});
+  g('docsGrid').innerHTML=h||'<div style="color:var(--grey)">Sem veiculos.</div>';
+}
+function uploadDoc(vid,docType,input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  if(!vehicleDocs[vid])vehicleDocs[vid]={};
+  vehicleDocs[vid][docType]={status:'ok',url:URL.createObjectURL(file),date:new Date().toISOString().slice(0,10),fileName:file.name};
+  renderDocs();
+  showToast('Documento "'+docType+'" carregado: '+file.name);
+}
+function renderStandDocs(){
+  var h='';
+  if(!currentUser)return;
+  var sId=currentUser.sId;
+  var myVIds=reservations.filter(function(r){return r.sId===sId;}).map(function(r){return r.vId;});
+  var myVehs=vehicles.filter(function(v){return myVIds.indexOf(v.id)>=0;});
+  myVehs.forEach(function(v){h+=renderDocsCard(v,'stand');});
+  g('standDocsGrid').innerHTML=h||'<div style="color:var(--grey)">Sem documentos disponiveis.</div>';
+}
+function uploadStandDoc(vid,docType,input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  if(!vehicleDocs[vid])vehicleDocs[vid]={};
+  vehicleDocs[vid][docType]={status:'ok',url:URL.createObjectURL(file),date:new Date().toISOString().slice(0,10),fileName:file.name};
+  renderStandDocs();
+  showToast('Documento "'+docType+'" carregado: '+file.name);
+}
+
+// === DELIVERY TRACKING ===
+var TRACK_STEPS=[
+  {key:'sinal',label:'Pagamento do Sinal',desc:'Sinal a acordar recebido'},
+  {key:'dekra',label:'Inspecao DEKRA',desc:'Inspecao tecnica na Alemanha (pre-aquisicao)'},
+  {key:'reserva',label:'Reserva Confirmada',desc:'Veiculo reservado pelo stand'},
+  {key:'pagamentoViatura',label:'Pagamento da Viatura',desc:'Valor total da viatura recebido'},
+  {key:'aquisicao',label:'Aquisicao na Alemanha',desc:'Veiculo adquirido ao vendedor'},
+  {key:'documentacaoDE',label:'Documentacao Alema',desc:'Abmeldung e documentos de exportacao'},
+  {key:'transporte',label:'Em Transporte',desc:'Veiculo a caminho de Portugal'},
+  {key:'chegada',label:'Chegada a Portugal',desc:'Veiculo entregue no ponto de rececao'},
+  {key:'legalizacao',label:'Legalizacao / ISV / Matricula',desc:'Processo IMT em curso'},
+  {key:'entrega',label:'Entregue ao Stand',desc:'Veiculo entregue e pronto a vender'}
+];
+var vehicleTracking={};
+// Init tracking for vehicle 1
+vehicleTracking[1]={
+  sinal:{done:true,date:'2026-03-18'},
+  dekra:{done:true,date:'2026-03-19'},
+  reserva:{done:true,date:'2026-03-20'},
+  pagamentoViatura:{done:true,date:'2026-03-21'},
+  aquisicao:{done:true,date:'2026-03-22'},
+  documentacaoDE:{done:true,date:'2026-03-24'},
+  transporte:{done:true,date:'2026-03-25'},
+  chegada:{done:false,date:''},
+  legalizacao:{done:false,date:''},
+  entrega:{done:false,date:''}
+};
+
+function renderTracking(){
+  var h='';
+  vehicles.forEach(function(v){
+    var tr=vehicleTracking[v.id]||{};
+    h+='<div class="doc-card">';
+    h+='<h4>'+v.marca+' '+v.modelo+'</h4>';
+    h+='<div class="doc-sub">'+v.ano+' | '+fmt(v.km)+' km</div>';
+    h+='<div style="margin-top:12px;">';
+    TRACK_STEPS.forEach(function(step,i){
+      var s=tr[step.key]||{done:false,date:''};
+      var color=s.done?'var(--green)':'var(--border)';
+      var icon=s.done?'&#10003;':(i+1);
+      h+='<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:4px;">';
+      // Timeline line
+      h+='<div style="display:flex;flex-direction:column;align-items:center;min-width:28px;">';
+      h+='<div style="width:28px;height:28px;border-radius:50%;background:'+color+';color:'+(s.done?'#fff':'var(--grey)')+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">'+icon+'</div>';
+      if(i<TRACK_STEPS.length-1) h+='<div style="width:2px;height:20px;background:'+(s.done?'var(--green)':'var(--border)')+'"></div>';
+      h+='</div>';
+      // Content
+      h+='<div style="padding-bottom:8px;">';
+      h+='<div style="font-size:13px;font-weight:'+(s.done?'600':'400')+';color:'+(s.done?'var(--white)':'var(--grey)')+';">'+step.label+'</div>';
+      h+='<div style="font-size:11px;color:var(--grey);">'+step.desc+(s.date?' - '+s.date:'')+'</div>';
+      if(!s.done&&currentUser&&currentUser.role==='admin'){
+        h+='<button class="btn btn-green btn-sm" style="margin-top:4px;padding:3px 10px;font-size:11px;" onclick="markTrackStep('+v.id+',\''+step.key+'\')">Marcar concluido</button>';
+      }
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+  });
+  g('trackingGrid').innerHTML=h||'<div style="color:var(--grey)">Sem veiculos em processo.</div>';
+}
+function markTrackStep(vid,stepKey){
+  if(!vehicleTracking[vid])vehicleTracking[vid]={};
+  vehicleTracking[vid][stepKey]={done:true,date:new Date().toISOString().slice(0,10)};
+  renderTracking();
+  showToast('Passo "'+stepKey+'" marcado como concluido');
+}
+function renderStandTracking(){
+  if(!currentUser)return;
+  var sId=currentUser.sId;
+  var myVIds=reservations.filter(function(r){return r.sId===sId;}).map(function(r){return r.vId;});
+  var myVehs=vehicles.filter(function(v){return myVIds.indexOf(v.id)>=0;});
+  var h='';
+  myVehs.forEach(function(v){
+    var tr=vehicleTracking[v.id]||{};
+    h+='<div class="doc-card">';
+    h+='<h4>'+v.marca+' '+v.modelo+'</h4>';
+    h+='<div class="doc-sub">'+v.ano+' | '+fmt(v.km)+' km</div>';
+    h+='<div style="margin-top:12px;">';
+    TRACK_STEPS.forEach(function(step,i){
+      var s=tr[step.key]||{done:false,date:''};
+      var color=s.done?'var(--green)':'var(--border)';
+      var icon=s.done?'&#10003;':(i+1);
+      h+='<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:4px;">';
+      h+='<div style="display:flex;flex-direction:column;align-items:center;min-width:28px;">';
+      h+='<div style="width:28px;height:28px;border-radius:50%;background:'+color+';color:'+(s.done?'#fff':'var(--grey)')+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">'+icon+'</div>';
+      if(i<TRACK_STEPS.length-1) h+='<div style="width:2px;height:20px;background:'+(s.done?'var(--green)':'var(--border)')+'"></div>';
+      h+='</div>';
+      h+='<div style="padding-bottom:8px;">';
+      h+='<div style="font-size:13px;font-weight:'+(s.done?'600':'400')+';color:'+(s.done?'var(--white)':'var(--grey)')+';">'+step.label+'</div>';
+      h+='<div style="font-size:11px;color:var(--grey);">'+step.desc+(s.date?' - '+s.date:'')+'</div>';
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+  });
+  g('standTrackingGrid').innerHTML=h||'<div style="color:var(--grey)">Sem veiculos em acompanhamento.</div>';
+}
+
+// === CALCULATOR (ADMIN) ===
+function buildCalc(){
+  g('calcContent').innerHTML=
+    '<div class="calc-box">'+
+    '<div class="fi-row">'+
+    '  <div class="fi"><label>Marca</label><select id="cMarca" onchange="runCalc()"><option>Mercedes</option><option>BMW</option><option>Audi</option><option>Volkswagen</option><option>Porsche</option></select></div>'+
+    '  <div class="fi"><label>Segmento</label><select id="cSeg" onchange="runCalc()"><option>Compacto</option><option>Sedan</option><option>SUV</option><option>Coupe</option><option>Carrinha</option></select></div>'+
+    '</div>'+
+    '<div class="fi-row">'+
+    '  <div class="fi"><label>Combustivel</label><select id="cComb" onchange="runCalc()"><option>Hibrido Plug-In</option><option>Eletrico</option><option>Diesel</option><option>Gasolina</option></select></div>'+
+    '  <div class="fi"><label>Ano</label><input id="cAno" type="number" value="2020" onchange="runCalc()"></div>'+
+    '</div>'+
+    '<div class="fi-row">'+
+    '  <div class="fi"><label>Quilometros</label><input id="cKm" type="number" value="64351" onchange="runCalc()"></div>'+
+    '  <div class="fi"><label>Preco Alemanha (c/IVA DE)</label><input id="cPreco" type="number" value="21850" onchange="runCalc()"></div>'+
+    '</div>'+
+    '<div class="fi">'+
+    '  <label>PVP Sugerido em Portugal (c/IVA)</label>'+
+    '  <input id="cPvp" type="number" value="28900" onchange="runCalc()" style="font-size:16px;font-weight:600;">'+
+    '</div>'+
+    '<div id="calcResult" class="calc-result"></div>'+
+    '</div>';
+  runCalc();
+}
+function runCalc(){
+  var preco=parseInt(g('cPreco').value)||0;
+  var comb=g('cComb').value;
+
+  var si=Math.round(preco/1.19);
+  var transp=900,dekra=130,legal=200,servico=2000;
+  var isv=0;
+  if(comb==='Hibrido Plug-In')isv=245;
+  else if(comb==='Eletrico')isv=0;
+  else if(comb==='Diesel')isv=1500;
+  else isv=1200;
+
+  var custoStand=si+transp+dekra+legal+servico;
+
+  var pvp=parseInt(g('cPvp').value)||28900;
+  var pvpSemIva=Math.round(pvp/1.23);
+  var margemReal=pvpSemIva - custoStand;
+
+  var h='';
+  h+='<div class="calc-row"><span class="cl">Preco DE (c/IVA DE)</span><span>EUR '+fmt(preco)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Preco DE (sem IVA -19%)</span><span style="color:var(--green)">EUR '+fmt(si)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Transporte DE-PT</span><span>EUR '+fmt(transp)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Inspecao DEKRA</span><span>EUR '+fmt(dekra)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Legalizacao IMT</span><span>EUR '+fmt(legal)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Servico GermanImport</span><span>EUR '+fmt(servico)+'</span></div>';
+  h+='<div class="calc-row total"><span class="cl">Custo Stand (sem IVA)</span><span class="cv">EUR '+fmt(custoStand)+'</span></div>';
+  h+='<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">';
+  h+='<div class="calc-row"><span class="cl">PVP Sugerido (c/IVA)</span><span style="font-weight:700;">EUR '+fmt(pvp)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">PVP sem IVA (/1.23)</span><span style="font-weight:600;color:var(--gold);">EUR '+fmt(pvpSemIva)+'</span></div>';
+  h+='</div>';
+  h+='<div style="margin-top:16px;padding:14px;background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;">';
+  h+='<span style="font-size:14px;font-weight:600;">Margem do Stand</span>';
+  h+='<span style="font-size:22px;font-weight:700;color:'+(margemReal>0?'var(--green)':'var(--red)')+';">EUR '+fmt(margemReal)+'</span>';
+  h+='</div>';
+  h+='<div style="margin-top:10px;font-size:11px;color:var(--grey);">Margem = PVP sem IVA (EUR '+fmt(pvpSemIva)+') - Custo Stand (EUR '+fmt(custoStand)+'). ISV de EUR '+fmt(isv)+' a liquidar separadamente na matricula.</div>';
+  g('calcResult').innerHTML=h;
+}
+
+// === CALCULATOR (STAND) ===
+function buildStandCalc(){
+  g('standCalcContent').innerHTML=
+    '<div class="calc-box">'+
+    '<div class="fi-row">'+
+    '  <div class="fi"><label>Combustivel</label><select id="sComb" onchange="runStandCalc()"><option>Hibrido Plug-In</option><option>Eletrico</option><option>Diesel</option><option>Gasolina</option></select></div>'+
+    '  <div class="fi"><label>Preco Alemanha (c/IVA DE)</label><input id="sPreco" type="number" value="21850" onchange="runStandCalc()"></div>'+
+    '</div>'+
+    '<div class="fi">'+
+    '  <label>PVP Sugerido em Portugal (c/IVA)</label>'+
+    '  <input id="sPvp" type="number" value="28900" onchange="runStandCalc()" style="font-size:16px;font-weight:600;">'+
+    '</div>'+
+    '<div id="standCalcResult" class="calc-result"></div>'+
+    '</div>';
+  runStandCalc();
+}
+function runStandCalc(){
+  var preco=parseInt(g('sPreco').value)||0;
+  var comb=g('sComb').value;
+
+  var si=Math.round(preco/1.19);
+  var transp=900,dekra=130,legal=200,servico=2000;
+  var isv=0;
+  if(comb==='Hibrido Plug-In')isv=245;
+  else if(comb==='Eletrico')isv=0;
+  else if(comb==='Diesel')isv=1500;
+  else isv=1200;
+
+  var custoStand=si+transp+dekra+legal+servico;
+
+  var pvp=parseInt(g('sPvp').value)||28900;
+  var pvpSemIva=Math.round(pvp/1.23);
+  var margemReal=pvpSemIva - custoStand;
+
+  var h='';
+  h+='<div class="calc-row"><span class="cl">Preco DE (sem IVA -19%)</span><span style="color:var(--green)">EUR '+fmt(si)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Transporte DE-PT</span><span>EUR '+fmt(transp)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Inspecao DEKRA</span><span>EUR '+fmt(dekra)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Legalizacao IMT</span><span>EUR '+fmt(legal)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">Servico GermanImport</span><span>EUR '+fmt(servico)+'</span></div>';
+  h+='<div class="calc-row total"><span class="cl">Custo Stand (sem IVA)</span><span class="cv">EUR '+fmt(custoStand)+'</span></div>';
+  h+='<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">';
+  h+='<div class="calc-row"><span class="cl">PVP Sugerido (c/IVA)</span><span style="font-weight:700;">EUR '+fmt(pvp)+'</span></div>';
+  h+='<div class="calc-row"><span class="cl">PVP sem IVA (/1.23)</span><span style="font-weight:600;color:var(--gold);">EUR '+fmt(pvpSemIva)+'</span></div>';
+  h+='</div>';
+  h+='<div style="margin-top:16px;padding:14px;background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;">';
+  h+='<span style="font-size:14px;font-weight:600;">Sua Margem</span>';
+  h+='<span style="font-size:22px;font-weight:700;color:'+(margemReal>0?'var(--green)':'var(--red)')+';">EUR '+fmt(margemReal)+'</span>';
+  h+='</div>';
+  h+='<div style="margin-top:10px;font-size:11px;color:var(--grey);">Margem = PVP sem IVA (EUR '+fmt(pvpSemIva)+') - Custo Stand (EUR '+fmt(custoStand)+'). ISV de EUR '+fmt(isv)+' a liquidar separadamente.</div>';
+  g('standCalcResult').innerHTML=h;
+}
+
+// === ISV SIMULATOR (CUSTOM) ===
+function buildISV(targetId){
+  var cid=targetId;
+  g(targetId).innerHTML='<div style="max-width:680px">'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:22px;margin-bottom:14px">'
+    +'<div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:16px;">Simulador ISV - Tabelas 2026</div>'
+    // Tipo + Combustivel
+    +'<div class="fi-row" style="margin-bottom:12px">'
+    +'<div class="fi"><label>Tipo de Veiculo</label>'
+    +'<select id="'+cid+'_tipo" onchange="isvUpdate(\''+cid+'\')">'
+    +'<option value="ligeiro">Ligeiro Passageiros</option>'
+    +'<option value="mercadorias">Ligeiro Mercadorias</option>'
+    +'<option value="moto">Motociclo</option>'
+    +'<option value="eletrico">Eletrico (Isento)</option>'
+    +'</select></div>'
+    +'<div class="fi"><label>Combustivel</label>'
+    +'<select id="'+cid+'_comb" onchange="isvUpdate(\''+cid+'\')">'
+    +'<option value="gasolina">Gasolina</option>'
+    +'<option value="diesel">Diesel</option>'
+    +'<option value="hibrido">Hibrido</option>'
+    +'<option value="plugin">Hibrido Plug-in</option>'
+    +'</select></div></div>'
+    // Cilindrada + CO2
+    +'<div class="fi-row" style="margin-bottom:12px">'
+    +'<div class="fi"><label>Cilindrada (cm3)</label>'
+    +'<input type="number" id="'+cid+'_cc" placeholder="Ex: 1600" oninput="isvUpdate(\''+cid+'\')"></div>'
+    +'<div class="fi"><label>CO2 (g/km)</label>'
+    +'<input type="number" id="'+cid+'_co2" placeholder="Ex: 120" oninput="isvUpdate(\''+cid+'\')"></div></div>'
+    // WLTP + Data matricula
+    +'<div class="fi-row" style="margin-bottom:12px">'
+    +'<div class="fi"><label>Medicao CO2</label>'
+    +'<select id="'+cid+'_wltp" onchange="isvUpdate(\''+cid+'\')">'
+    +'<option value="wltp">WLTP (pos-2018)</option>'
+    +'<option value="nedc">NEDC (pre-2018)</option>'
+    +'</select></div>'
+    +'<div class="fi"><label>Primeira Matricula</label>'
+    +'<input type="month" id="'+cid+'_data" onchange="isvUpdate(\''+cid+'\')"></div></div>'
+    // Autonomia PHEV + Particulas Diesel
+    +'<div class="fi-row" style="margin-bottom:12px">'
+    +'<div class="fi" id="'+cid+'_div_auto" style="display:none"><label>Autonomia Eletrica (km) - PHEV</label>'
+    +'<input type="number" id="'+cid+'_auto" placeholder="Ex: 50" oninput="isvUpdate(\''+cid+'\')"></div>'
+    +'<div class="fi" id="'+cid+'_div_part" style="display:none"><label>Filtro Particulas (Diesel)</label>'
+    +'<select id="'+cid+'_part" onchange="isvUpdate(\''+cid+'\')">'
+    +'<option value="0">Sem filtro / Desconhecido</option>'
+    +'<option value="1">Com filtro (<=5 mg/km)</option>'
+    +'</select></div></div>'
+    // Resultado
+    +'<div id="'+cid+'_res" style="display:none;background:linear-gradient(135deg,rgba(200,162,78,0.1),rgba(200,162,78,0.02));border:1px solid var(--border);border-radius:6px;padding:20px;margin-top:16px;">'
+    +'<div style="font-size:11px;color:var(--grey);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">ISV Estimado</div>'
+    +'<div id="'+cid+'_val" style="font-size:36px;font-weight:700;color:var(--gold)">0,00 EUR</div>'
+    +'<div id="'+cid+'_det" style="font-size:12px;color:var(--grey);margin-top:10px;line-height:1.8"></div>'
+    +'</div>'
+    +'</div>'
+    // Dicas
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:20px">'
+    +'<div style="font-size:14px;font-weight:600;margin-bottom:14px">Dicas ISV 2026</div>'
+    +'<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="font-size:18px">&#9889;</span><div><strong>100% Eletricos</strong><br><span style="color:var(--grey)">Isentos de ISV. Melhor opcao fiscal.</span></div></div>'
+    +'<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="font-size:18px">&#128268;</span><div><strong>PHEV elegivel (desconto 75%)</strong><br><span style="color:var(--grey)">Autonomia >=50km e CO2 <=80g/km (Euro 6e-bis). Matriculas 2015-2020 aceita >=25km.</span></div></div>'
+    +'<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="font-size:18px">&#128197;</span><div><strong>Idade do veiculo (UE)</strong><br><span style="color:var(--grey)">1 ano=10% / 5 anos=43% / 7 anos=60% / 10+ anos=80% de reducao.</span></div></div>'
+    +'<div style="display:flex;gap:12px;padding:10px 0;font-size:13px;"><span style="font-size:18px">&#9888;</span><div><strong>Agravamento Diesel</strong><br><span style="color:var(--grey)">+500 EUR se particulas >=0.001g/km ou sem informacao (ligeiros passageiros).</span></div></div>'
+    +'</div></div>';
+}
+function isvUpdate(cid){
+  var tipo=g(cid+'_tipo').value;
+  var comb=g(cid+'_comb').value;
+  var cc=parseInt(g(cid+'_cc').value)||0;
+  var co2=parseInt(g(cid+'_co2').value)||0;
+  var wltp=g(cid+'_wltp').value;
+  var dataStr=g(cid+'_data').value;
+  var auto=parseInt(g(cid+'_auto').value)||0;
+  var part=g(cid+'_part').value;
+  // Show/hide dynamic fields
+  var divAuto=g(cid+'_div_auto');
+  var divPart=g(cid+'_div_part');
+  if(divAuto) divAuto.style.display=(comb==='plugin')?'flex':'none';
+  if(divPart) divPart.style.display=(comb==='diesel')?'flex':'none';
+  var res=g(cid+'_res');
+  if(!res) return;
+  var fmtE=function(v){return v.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' EUR';};
+  // Eletrico isento
+  if(tipo==='eletrico'){
+    res.style.display='block';
+    g(cid+'_val').textContent='0,00 EUR';
+    g(cid+'_val').style.color='var(--green)';
+    g(cid+'_det').innerHTML='<span style="color:var(--green)">Veiculo 100% eletrico - Isento de ISV</span>';
+    return;
+  }
+  if(!cc){res.style.display='none';return;}
+
+  // === COMPONENTE CILINDRADA (Tabelas ISV 2026 oficiais) ===
+  var p_cc=0;
+  if(tipo==='moto'){
+    // Tabela C - Motociclos (taxa unica por escalao)
+    if(cc<120) p_cc=0;
+    else if(cc<=250) p_cc=73.78;
+    else if(cc<=350) p_cc=91.63;
+    else if(cc<=500) p_cc=122.57;
+    else if(cc<=750) p_cc=184.45;
+    else p_cc=245.14;
+  } else if(tipo==='mercadorias'){
+    // Tabela B - Mercadorias/autocaravanas
+    if(cc<=1250) p_cc=cc*5.30-3331.68;
+    else p_cc=cc*12.58-12138.47;
+    if(p_cc<0) p_cc=0;
+  } else {
+    // Tabela A - Ligeiros passageiros
+    if(cc<=1000) p_cc=cc*1.09-849.03;
+    else if(cc<=1250) p_cc=cc*1.18-850.69;
+    else p_cc=cc*5.61-6194.88;
+    if(p_cc<0) p_cc=0;
+  }
+
+  // === COMPONENTE AMBIENTAL (CO2) ===
+  // IMPORTANTE: pode ser negativa (oficial AT permite isto para baixar o total)
+  var p_co2=0;
+  var hasCO2=(tipo==='ligeiro'&&co2>0);
+  if(hasCO2){
+    var isDiesel=(comb==='diesel');
+    if(wltp==='wltp'){
+      if(isDiesel){
+        // Gasoleo WLTP
+        if(co2<=110) p_co2=co2*1.72-11.50;
+        else if(co2<=120) p_co2=co2*18.96-1906.19;
+        else if(co2<=140) p_co2=co2*65.04-7360.85;
+        else if(co2<=150) p_co2=co2*127.40-16080.57;
+        else if(co2<=160) p_co2=co2*160.81-21176.06;
+        else if(co2<=170) p_co2=co2*221.69-29227.38;
+        else if(co2<=190) p_co2=co2*274.08-36987.98;
+        else p_co2=co2*282.35-38271.32;
+      } else {
+        // Gasolina WLTP
+        if(co2<=110) p_co2=co2*0.44-43.02;
+        else if(co2<=115) p_co2=co2*1.10-115.80;
+        else if(co2<=120) p_co2=co2*1.38-147.79;
+        else if(co2<=130) p_co2=co2*5.27-619.17;
+        else if(co2<=145) p_co2=co2*6.38-762.73;
+        else if(co2<=175) p_co2=co2*41.54-5819.56;
+        else if(co2<=195) p_co2=co2*51.38-7247.39;
+        else if(co2<=235) p_co2=co2*193.01-34190.52;
+        else p_co2=co2*233.81-41910.96;
+      }
+    } else {
+      // NEDC
+      if(isDiesel){
+        if(co2<=79) p_co2=co2*5.78-439.04;
+        else if(co2<=95) p_co2=co2*23.45-1848.58;
+        else if(co2<=120) p_co2=co2*79.22-7195.63;
+        else if(co2<=140) p_co2=co2*175.73-18924.92;
+        else if(co2<=160) p_co2=co2*195.43-21720.92;
+        else p_co2=co2*268.42-33447.90;
+      } else {
+        if(co2<=99) p_co2=co2*4.62-427.00;
+        else if(co2<=115) p_co2=co2*8.09-750.99;
+        else if(co2<=145) p_co2=co2*52.56-5903.94;
+        else if(co2<=175) p_co2=co2*61.24-7140.17;
+        else if(co2<=195) p_co2=co2*155.97-23627.27;
+        else p_co2=co2*205.65-33390.12;
+      }
+    }
+    // Nota: p_co2 pode ser negativa (conforme simulador oficial AT)
+  }
+
+  // === ANOS DE IDADE ===
+  var anos=0;
+  if(dataStr){
+    var matData=new Date(dataStr+'-01');
+    anos=(new Date()-matData)/(1000*60*60*24*365.25);
+  }
+  var matAno=dataStr?parseInt(dataStr.substring(0,4)):0;
+
+  // === TAXA INTERMEDIA PHEV/HIBRIDOS ===
+  // PHEV 25% SO se aplica a matriculas 2015-2020 + autonomia >=25km
+  // Em 2026, Euro 6e-bis: >=50km E CO2<=80g/km tambem elegivel
+  // Hibridos normais: 60% do ISV
+  var perc=1.0;
+  var lbl_p='';
+  if(comb==='plugin'){
+    var phevEligivel=false;
+    // Regra 2015-2020 (autonomia >=25km)
+    if(matAno>=2015&&matAno<=2020&&auto>=25){
+      phevEligivel=true;
+      lbl_p='PHEV 2015-2020 (25% do ISV)';
+    }
+    // Regra nova Euro 6e-bis (para veiculos novos/recentes)
+    else if(auto>=50&&co2<=80&&matAno>=2026){
+      phevEligivel=true;
+      lbl_p='PHEV Euro 6e-bis (25% do ISV)';
+    }
+    if(phevEligivel) perc=0.25;
+    else lbl_p='PHEV fora da janela de beneficio (100%)';
+  } else if(comb==='hibrido'){
+    if(auto>=50&&co2<=50){
+      perc=0.60;
+      lbl_p='Hibrido elegivel (60% do ISV)';
+    } else {
+      lbl_p='Hibrido sem beneficio (100%)';
+    }
+  }
+
+  // Taxa aplicavel da tabela (soma componentes, aplicada a percentagem)
+  var taxaAplicavel=(p_cc+p_co2)*perc;
+
+  // === REDUCAO ANTIGUIDADE (aplicada A CADA COMPONENTE separadamente) ===
+  var pctRed=0;
+  if(anos>=10) pctRed=0.80;
+  else if(anos>9) pctRed=0.75;
+  else if(anos>8) pctRed=0.70;
+  else if(anos>7) pctRed=0.65;
+  else if(anos>6) pctRed=0.60;
+  else if(anos>5) pctRed=0.52;
+  else if(anos>4) pctRed=0.43;
+  else if(anos>3) pctRed=0.35;
+  else if(anos>2) pctRed=0.28;
+  else if(anos>1) pctRed=0.20;
+  else if(anos>=0.5) pctRed=0.10;
+
+  // Reducao aplicada a cada componente (oficial AT)
+  // REGRA: se a reducao 04b (ambiental) for negativa, e tratada como 0
+  // (a AT nao aplica reducoes negativas que aumentariam o imposto)
+  var red_cc=p_cc*perc*pctRed;
+  var red_co2_calc=p_co2*perc*pctRed;
+  var red_co2=red_co2_calc>0?red_co2_calc:0;
+
+  // === AGRAVAMENTO DIESEL (particulas) ===
+  var agrav=0;
+  if(comb==='diesel'&&tipo==='ligeiro'){
+    agrav=(part==='0')?500:0;
+  } else if(comb==='diesel'&&tipo==='mercadorias'){
+    agrav=(part==='0')?250:0;
+  }
+  var red_part=agrav*pctRed;
+
+  // === TOTAL (formula oficial AT: 03 - 04a - 04b + 05 - 05a) ===
+  var total=taxaAplicavel - red_cc - red_co2 + agrav - red_part;
+  if(total<0) total=0;
+
+  // Minimo 100 EUR (tabelas A e B, nao moto)
+  if(tipo!=='moto'&&total>0&&total<100) total=100;
+
+  // === DISPLAY ===
+  res.style.display='block';
+  g(cid+'_val').textContent=fmtE(total);
+  g(cid+'_val').style.color=total===0?'var(--green)':'var(--gold)';
+  var det='';
+  det+='01. Componente cilindrada: '+fmtE(p_cc)+'<br>';
+  if(hasCO2){
+    var co2Color=p_co2<0?'color:var(--green);':'';
+    det+='02. Componente ambiental: <span style="'+co2Color+'">'+fmtE(p_co2)+'</span><br>';
+  }
+  det+='03. Taxa aplicavel ('+(perc*100).toFixed(0)+'%): '+fmtE(taxaAplicavel)+'<br>';
+  if(perc<1.0) det+='&nbsp;&nbsp;&rarr; '+lbl_p+'<br>';
+  if(pctRed>0){
+    det+='04a. Reducao idade cilindrada ('+Math.round(pctRed*100)+'%): -'+fmtE(red_cc)+'<br>';
+    if(hasCO2){
+      if(red_co2_calc<=0) det+='04b. Reducao idade ambiental ('+Math.round(pctRed*100)+'%): 0,00 EUR <span style="color:var(--grey);font-size:10px;">(nao aplicada - componente ambiental negativa)</span><br>';
+      else det+='04b. Reducao idade ambiental ('+Math.round(pctRed*100)+'%): -'+fmtE(red_co2)+'<br>';
+    }
+  }
+  if(agrav>0){
+    det+='05. Agravamento particulas: +'+fmtE(agrav)+'<br>';
+    if(pctRed>0) det+='05a. Reducao idade particulas: -'+fmtE(red_part)+'<br>';
+  }
+  det+='<strong style="color:var(--gold)">06. Total ISV: '+fmtE(total)+'</strong>';
+  g(cid+'_det').innerHTML=det;
+}
+
+// === GUIDE ===
+function buildGuia(){
+  g('guiaContent').innerHTML=
+    '<div style="max-width:600px;">'+
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:16px;">'+
+    '<h3 style="font-size:15px;color:var(--gold);margin-bottom:12px;">1. Selecione o Veiculo</h3>'+
+    '<p style="font-size:13px;color:var(--grey);line-height:1.6;">Navegue pelas oportunidades disponiveis. Cada ficha inclui o custo total e a margem estimada para o seu negocio.</p></div>'+
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:16px;">'+
+    '<h3 style="font-size:15px;color:var(--gold);margin-bottom:12px;">2. Reserve</h3>'+
+    '<p style="font-size:13px;color:var(--grey);line-height:1.6;">Clique em "Reservar" para garantir o veiculo por 7 dias. Durante esse periodo, ninguem mais podera reservar.</p></div>'+
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:16px;">'+
+    '<h3 style="font-size:15px;color:var(--gold);margin-bottom:12px;">3. Confirmacao e Pagamento</h3>'+
+    '<p style="font-size:13px;color:var(--grey);line-height:1.6;">Apos confirmar, procede-se a aquisicao na Alemanha. O pagamento e faseado: 50% na confirmacao, 50% na entrega.</p></div>'+
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:16px;">'+
+    '<h3 style="font-size:15px;color:var(--gold);margin-bottom:12px;">4. Inspecao e Transporte</h3>'+
+    '<p style="font-size:13px;color:var(--grey);line-height:1.6;">O veiculo e inspecionado pela DEKRA na Alemanha e transportado para Portugal. Prazo medio: 10-15 dias uteis.</p></div>'+
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;">'+
+    '<h3 style="font-size:15px;color:var(--gold);margin-bottom:12px;">5. Legalizacao e Entrega</h3>'+
+    '<p style="font-size:13px;color:var(--grey);line-height:1.6;">Tratamos de toda a legalizacao: ISV, matricula portuguesa e documentos IMT. Entrega no seu stand, pronto a vender.</p></div>'+
+    '</div>';
+}
+
+// === PROFILE ===
+function buildPerfil(){
+  if(!currentUser)return;
+  var s=stands.find(function(x){return x.id===currentUser.sId;});
+  if(!s)return;
+  g('perfilContent').innerHTML=
+    '<div style="max-width:400px;">'+
+    '<div class="fi"><label>Nome do Stand</label><input value="'+s.nome+'" disabled></div>'+
+    '<div class="fi"><label>Contacto</label><input value="'+s.contacto+'" disabled></div>'+
+    '<div class="fi"><label>Email</label><input value="'+s.email+'" disabled></div>'+
+    '<div class="fi"><label>Localidade</label><input value="'+s.localidade+'" disabled></div>'+
+    '<div class="fi"><label>Estado</label><input value="'+s.estado+'" disabled></div>'+
+    '</div>';
+}
+
+// === INIT ===
+requestAnimationFrame(function(){
+  var LOGO_URL='germanimport-logo.jpg';
+  var ll=g('loginLogo');if(ll){ll.src=LOGO_URL;ll.style.display='block';ll.onerror=function(){ll.style.display='none';var lt=g('loginLogoText');if(lt)lt.style.display='block';};}
+  var tl=g('topLogo');if(tl){tl.src=LOGO_URL;tl.onerror=function(){tl.style.display='none';};}
+  var lt=g('loginLogoText');if(lt)lt.style.display='none';
+  g('lEmail').focus();
+});
+</script>
+</body>
+</html>
