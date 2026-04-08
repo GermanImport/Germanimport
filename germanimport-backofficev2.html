@@ -18,7 +18,7 @@ a{color:var(--gold);text-decoration:none;}
 /* ── LOGIN ── */
 .login-overlay{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:9999;}
 .login-box{background:var(--dark);border:1px solid var(--border);border-radius:12px;padding:48px 36px;width:90%;max-width:380px;text-align:center;}
-.login-logo{height:200px;margin-bottom:18px;display:block;margin-left:auto;margin-right:auto;max-width:100%;}
+.login-logo{height:240px;margin-bottom:18px;display:block;margin-left:auto;margin-right:auto;max-width:100%;}
 .login-title{font-size:18px;font-weight:600;margin-bottom:6px;}
 .login-sub{font-size:13px;color:var(--grey);margin-bottom:28px;}
 .login-field{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:12px 16px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:12px;outline:none;}
@@ -33,16 +33,16 @@ a{color:var(--gold);text-decoration:none;}
 
 /* ── LAYOUT ── */
 .app{display:none;height:100vh;overflow:hidden;}
-.topbar{height:56px;background:var(--dark);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:fixed;top:0;left:0;right:0;z-index:100;}
-.topbar-logo{height:46px;}
+.topbar{height:90px;background:var(--dark);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:fixed;top:0;left:0;right:0;z-index:100;}
+.topbar-logo{height:78px;}
 .topbar-spacer{flex:1;}
 .topbar-user{font-size:13px;color:var(--grey);}
 .topbar-btn{background:none;border:1px solid var(--border);color:var(--white);padding:6px 14px;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .topbar-btn:hover{border-color:var(--gold);color:var(--gold);}
-.lang-selector{display:flex;gap:4px;margin-right:8px;}
-.lang-btn{background:none;border:1px solid transparent;border-radius:4px;padding:4px 6px;cursor:pointer;font-size:16px;transition:all .2s;opacity:0.5;}
-.lang-btn:hover{opacity:1;}
-.lang-btn.active{opacity:1;border-color:var(--gold);background:var(--gold-dim);}
+.lang-selector{display:flex;gap:6px;margin-right:10px;background:rgba(255,255,255,0.04);padding:4px;border-radius:8px;border:1px solid var(--border);}
+.lang-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:20px;line-height:1;transition:all .2s;opacity:0.85;min-width:38px;display:flex;align-items:center;justify-content:center;}
+.lang-btn:hover{opacity:1;background:rgba(200,162,78,0.15);border-color:var(--gold);}
+.lang-btn.active{opacity:1;border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 2px rgba(200,162,78,0.2);}
 
 /* === AI ASSISTANT WIDGET === */
 .ai-fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#c8a24e,#9d7d36);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(200,162,78,0.4);z-index:9998;display:flex;align-items:center;justify-content:center;font-size:26px;color:#111;transition:all .3s;}
@@ -82,14 +82,14 @@ a{color:var(--gold);text-decoration:none;}
 .ai-suggestions button:hover{background:rgba(200,162,78,0.2);}
 .menu-toggle{background:none;border:none;color:var(--white);font-size:22px;cursor:pointer;display:none;}
 
-.sidebar{width:240px;background:var(--dark);border-right:1px solid var(--border);position:fixed;top:56px;bottom:0;left:0;overflow-y:auto;z-index:90;transition:transform .3s;}
+.sidebar{width:240px;background:var(--dark);border-right:1px solid var(--border);position:fixed;top:90px;bottom:0;left:0;overflow-y:auto;z-index:90;transition:transform .3s;}
 .sb-sec{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--grey);padding:20px 20px 8px;font-weight:600;}
 .ni{padding:10px 20px;cursor:pointer;font-size:13px;color:var(--grey);display:flex;align-items:center;gap:10px;transition:all .15s;border-left:3px solid transparent;}
 .ni:hover{color:var(--white);background:rgba(255,255,255,0.03);}
 .ni.active{color:var(--gold);border-left-color:var(--gold);background:var(--gold-dim);}
 .ni-icon{width:20px;text-align:center;}
 
-.main{margin-left:240px;margin-top:56px;padding:28px;height:calc(100vh - 56px);overflow-y:auto;contain:layout;-webkit-overflow-scrolling:touch;}
+.main{margin-left:240px;margin-top:90px;padding:28px;height:calc(100vh - 90px);overflow-y:auto;contain:layout;-webkit-overflow-scrolling:touch;}
 
 /* ── PAGES ── */
 .page{display:none;}
@@ -245,14 +245,18 @@ a{color:var(--gold);text-decoration:none;}
   .vgrid{grid-template-columns:1fr;}
   .fi-row{grid-template-columns:1fr;}
   .modal{padding:16px;}
-  .topbar-logo{height:38px;}
-  .lang-selector{margin-right:4px;}
-  .lang-btn{padding:3px 4px;font-size:14px;}
+  .topbar{height:74px;padding:0 12px;gap:8px;}
+  .topbar-logo{height:60px;}
+  .lang-selector{margin-right:4px;padding:3px;gap:4px;}
+  .lang-btn{padding:4px 6px;min-width:32px;}
+  .lang-btn svg{width:18px;height:13px;}
   .topbar-user{display:none;}
   .topbar-btn{padding:6px 10px;font-size:11px;}
-  .login-logo{height:160px;}
+  .login-logo{height:180px;}
   .ai-fab{bottom:18px;right:18px;width:54px;height:54px;font-size:22px;}
   .ai-chat{bottom:0;right:0;width:100%;height:100%;max-width:100%;max-height:100%;border-radius:0;}
+  .sidebar{top:74px;}
+  .main{margin-top:74px;height:calc(100vh - 74px);}
 }
 </style>
 </head>
@@ -290,9 +294,9 @@ a{color:var(--gold);text-decoration:none;}
     <img id="topLogo" class="topbar-logo" src="" alt="GermanImport" decoding="async">
     <div class="topbar-spacer"></div>
     <div class="lang-selector">
-      <button class="lang-btn active" data-lang="pt" onclick="setLang('pt')" title="Português">&#127477;&#127481;</button>
-      <button class="lang-btn" data-lang="en" onclick="setLang('en')" title="English">&#127468;&#127463;</button>
-      <button class="lang-btn" data-lang="es" onclick="setLang('es')" title="Espanhol">&#127466;&#127480;</button>
+      <button class="lang-btn active" data-lang="pt" onclick="setLang('pt')" title="Português"><svg width="22" height="16" viewBox="0 0 22 16" xmlns="http://www.w3.org/2000/svg"><rect width="9" height="16" fill="#006600"/><rect x="9" width="13" height="16" fill="#FF0000"/><circle cx="9" cy="8" r="3.2" fill="#FFCC00" stroke="#000" stroke-width="0.4"/><circle cx="9" cy="8" r="2.2" fill="#003399"/></svg></button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')" title="English"><svg width="22" height="16" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><clipPath id="t"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath><path d="M0,0v30h60v-30z" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></svg></button>
+      <button class="lang-btn" data-lang="es" onclick="setLang('es')" title="Espanhol"><svg width="22" height="16" viewBox="0 0 22 16" xmlns="http://www.w3.org/2000/svg"><rect width="22" height="16" fill="#AA151B"/><rect y="4" width="22" height="8" fill="#F1BF00"/></svg></button>
     </div>
     <span id="topUser" class="topbar-user"></span>
     <button class="topbar-btn" onclick="doLogout()" data-i18n="logout">Sair</button>
@@ -446,7 +450,7 @@ a{color:var(--gold);text-decoration:none;}
     <hr style="border-color:var(--border);margin:20px 0;">
     <h3 style="font-size:15px;margin-bottom:16px;">Valores</h3>
     <div class="fi-row">
-      <div class="fi"><label>Preço Veículo (sem IVA DE)</label><input id="vPrecoReal" type="number" value="18361"></div>
+      <div class="fi"><label>Preço Veículo (sem IVA DE)</label><input id="vPrecoReal" type="number" value="17500"></div>
       <div class="fi"><label>Transporte DE-PT</label><input id="vTransp" type="number" value="900"></div>
     </div>
     <div class="fi-row">
@@ -457,7 +461,7 @@ a{color:var(--gold);text-decoration:none;}
       <div class="fi"><label>Serviço GermanImport (+ IVA)</label><input id="vServico" type="number" value="1800"></div>
       <div class="fi"><label>ISV Estimado</label><input id="vIsv" type="number" value="177"></div>
     </div>
-    <div class="fi"><label>PVP Recomendado (mercado PT c/IVA)</label><input id="vPvp" type="number" value="28900"></div>
+    <div class="fi"><label>PVP Recomendado (mercado PT c/IVA)</label><input id="vPvp" type="number" value="27900"></div>
     <div style="display:flex;gap:10px;margin-top:20px;">
       <button class="btn btn-gold" onclick="saveVehicle()">Guardar</button>
       <button class="btn btn-ghost" onclick="closeModal('vehicleModal')">Cancelar</button>
@@ -496,10 +500,10 @@ var vehicles = [
     id:1, marca:'Mercedes', modelo:'A 250e AMG Line', ano:2020, km:64351,
     comb:'Híbrido Plug-In', trans:'Automática', cor:'Preto',
     desc:'Interior em pele, LED High Performance, navegação MBUX, câmara traseira, sensores, jantes 18 AMG',
-    img:'',
-    precoReal:18361, markup:0, preco:18361,
+    img:'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&q=80',
+    precoReal:17500, markup:0, preco:17500,
     transp:900, dekra:130, legal:200, servico:1800, isv:177,
-    pvp:28900, status:'Disponível'
+    pvp:27900, status:'Disponível'
   }
 ];
 
@@ -1020,8 +1024,8 @@ function openVehicleModal(){
   g('vMarca').value='';g('vModelo').value='';g('vAno').value='';g('vKm').value='';
   g('vComb').value='Híbrido Plug-In';g('vTrans').value='Automática';g('vCor').value='';
   g('vImg').value='';g('vDesc').value='';
-  g('vPrecoReal').value=18361;g('vTransp').value=900;g('vDekra').value=130;
-  g('vLegal').value=200;g('vServico').value=1800;g('vIsv').value=177;g('vPvp').value=28900;
+  g('vPrecoReal').value=17500;g('vTransp').value=900;g('vDekra').value=130;
+  g('vLegal').value=200;g('vServico').value=1800;g('vIsv').value=177;g('vPvp').value=27900;
   g('vehicleModal').classList.add('show');
 }
 function editVehicle(vid){
@@ -1374,11 +1378,11 @@ function buildCalc(){
     '</div>'+
     '<div class="fi-row">'+
     '  <div class="fi"><label>Combustível</label><select id="cComb" onchange="runCalc()"><option>Híbrido Plug-In</option><option>Elétrico</option><option>Diesel</option><option>Gasolina</option></select></div>'+
-    '  <div class="fi"><label>Preço Veículo (sem IVA DE)</label><input id="cPreco" type="number" value="18361" onchange="runCalc()" oninput="runCalc()"></div>'+
+    '  <div class="fi"><label>Preço Veículo (sem IVA DE)</label><input id="cPreco" type="number" value="17500" onchange="runCalc()" oninput="runCalc()"></div>'+
     '</div>'+
     '<div class="fi">'+
     '  <label>PVP Sugerido em Portugal (c/IVA)</label>'+
-    '  <input id="cPvp" type="number" value="28900" onchange="runCalc()" oninput="runCalc()" style="font-size:16px;font-weight:600;">'+
+    '  <input id="cPvp" type="number" value="27900" onchange="runCalc()" oninput="runCalc()" style="font-size:16px;font-weight:600;">'+
     '</div>'+
     '<div class="fi" style="margin-top:14px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;">'+
     '  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px;">'+
@@ -1403,11 +1407,11 @@ function buildStandCalc(){
     '</div>'+
     '<div class="fi-row">'+
     '  <div class="fi"><label>Combustível</label><select id="sComb" onchange="runStandCalc()"><option>Híbrido Plug-In</option><option>Elétrico</option><option>Diesel</option><option>Gasolina</option></select></div>'+
-    '  <div class="fi"><label>Preço Veículo (sem IVA DE)</label><input id="sPreco" type="number" value="18361" onchange="runStandCalc()" oninput="runStandCalc()"></div>'+
+    '  <div class="fi"><label>Preço Veículo (sem IVA DE)</label><input id="sPreco" type="number" value="17500" onchange="runStandCalc()" oninput="runStandCalc()"></div>'+
     '</div>'+
     '<div class="fi">'+
     '  <label>PVP Sugerido em Portugal (c/IVA)</label>'+
-    '  <input id="sPvp" type="number" value="28900" onchange="runStandCalc()" oninput="runStandCalc()" style="font-size:16px;font-weight:600;">'+
+    '  <input id="sPvp" type="number" value="27900" onchange="runStandCalc()" oninput="runStandCalc()" style="font-size:16px;font-weight:600;">'+
     '</div>'+
     '<div class="fi" style="margin-top:14px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;">'+
     '  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px;">'+
