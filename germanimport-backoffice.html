@@ -357,6 +357,11 @@ a{color:var(--gold);text-decoration:none;}
       <div id="isvContent"></div>
     </div>
 
+    <div class="page" id="pg-analise">
+      <div class="ph"><div><h1>Análise de Mercado</h1><p>Avalie oportunidades de importação cruzando dados DE com mercado PT</p></div></div>
+      <div id="analiseContent"></div>
+    </div>
+
     <div class="page" id="pg-docs">
       <div class="ph"><div><h1 data-i18n="pgDocs">Documentação</h1><p data-i18n="pgDocsSub">Documentos por veículo</p></div></div>
       <div id="docsGrid" class="doc-grid"></div>
@@ -389,6 +394,11 @@ a{color:var(--gold);text-decoration:none;}
     <div class="page" id="pg-standIsv">
       <div class="ph"><div><h1 data-i18n="pgISV">Simulador ISV</h1><p data-i18n="pgISVSub">Calculé o ISV estimado</p></div></div>
       <div id="standIsvContent"></div>
+    </div>
+
+    <div class="page" id="pg-standAnalise">
+      <div class="ph"><div><h1>Análise de Mercado</h1><p>Avalie oportunidades de importação cruzando dados DE com mercado PT</p></div></div>
+      <div id="standAnaliseContent"></div>
     </div>
 
     <div class="page" id="pg-standDocs">
@@ -614,6 +624,7 @@ var I18N={
     niDashboard:'Dashboard', niVeiculos:'Veículos', niStands:'Stands', niReservas:'Reservas',
     niCalc:'Calculadora', niISV:'Simulador ISV', niDocs:'Documentação', niTracking:'Seguimento',
     niOportunidades:'Oportunidades', niMinhasRes:'Minhas Reservas',
+    niAnalise:'Análise de Mercado',
     niGuia:'Guia do Parceiro', niPerfil:'Meu Perfil',
     // Vehicle cards
     ficha:'Ficha', editar:'Editar', reservar:'Reservar',
@@ -655,6 +666,7 @@ var I18N={
     niDashboard:'Dashboard', niVeiculos:'Vehicles', niStands:'Stands', niReservas:'Reservations',
     niCalc:'Calculator', niISV:'ISV Simulator', niDocs:'Documentation', niTracking:'Tracking',
     niOportunidades:'Opportunities', niMinhasRes:'My Reservations',
+    niAnalise:'Market Analysis',
     niGuia:'Partner Guide', niPerfil:'My Profile',
     ficha:'Details', editar:'Edit', reservar:'Reserve',
     custo:'Cost', custoTotal:'Total cost', margem:'Margin',
@@ -692,6 +704,7 @@ var I18N={
     niDashboard:'Panel', niVeiculos:'Vehiculos', niStands:'Stands', niReservas:'Reservas',
     niCalc:'Calculadora', niISV:'Simulador ISV', niDocs:'Documentacion', niTracking:'Seguimiento',
     niOportunidades:'Oportunidades', niMinhasRes:'Mis Reservas',
+    niAnalise:'Análisis de Mercado',
     niGuia:'Guia del Socio', niPerfil:'Mi Perfil',
     ficha:'Ficha', editar:'Editar', reservar:'Reservar',
     custo:'Coste', custoTotal:'Coste total', margem:'Margen',
@@ -803,6 +816,7 @@ function buildSidebar(){
     h+='<div class="sb-sec">'+t('sbFerramentas')+'</div>';
     h+='<div class="ni" onclick="showPage(\'calc\',this);buildCalc()"><span class="ni-icon">🧮</span> '+t('niCalc')+'</div>';
     h+='<div class="ni" onclick="showPage(\'isv\',this);buildISV(\'isvContent\')"><span class="ni-icon">💰</span> '+t('niISV')+'</div>';
+    h+='<div class="ni" onclick="showPage(\'analise\',this);buildAnalise(\'analise\')"><span class="ni-icon">🔍</span> '+t('niAnalise')+'</div>';
     h+='<div class="ni" onclick="showPage(\'docs\',this);renderDocs()"><span class="ni-icon">📁</span> '+t('niDocs')+'</div>';
     h+='<div class="ni" onclick="showPage(\'tracking\',this);renderTracking()"><span class="ni-icon">🚚</span> '+t('niTracking')+'</div>';
   } else {
@@ -812,6 +826,7 @@ function buildSidebar(){
     h+='<div class="sb-sec">'+t('sbFerramentas')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standCalc\',this);buildStandCalc()"><span class="ni-icon">🧮</span> '+t('niCalc')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standIsv\',this);buildISV(\'standIsvContent\')"><span class="ni-icon">💰</span> '+t('niISV')+'</div>';
+    h+='<div class="ni" onclick="showPage(\'standAnalise\',this);buildAnalise(\'standAnalise\')"><span class="ni-icon">🔍</span> '+t('niAnalise')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standDocs\',this);renderStandDocs()"><span class="ni-icon">📁</span> '+t('niDocs')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standTracking\',this);renderStandTracking()"><span class="ni-icon">🚚</span> '+t('niTracking')+'</div>';
     h+='<div class="sb-sec">'+t('sbApoio')+'</div>';
@@ -2143,6 +2158,316 @@ function buildPerfil(){
     '<div class="fi"><label>Localidade</label><input value="'+s.localidade+'" disabled></div>'+
     '<div class="fi"><label>Estado</label><input value="'+s.estado+'" disabled></div>'+
     '</div>';
+}
+
+// === ANÁLISE DE MERCADO (Opportunity Analyzer) ===
+var analiseTab = 'url'; // 'url' ou 'manual'
+var lastAnalise = null;
+
+function buildAnalise(prefix){
+  var containerId = prefix==='analise' ? 'analiseContent' : 'standAnaliseContent';
+  var html = '';
+
+  // Header introdutório
+  html += '<div style="background:linear-gradient(135deg,rgba(200,162,78,0.08),rgba(200,162,78,0.02));border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:18px;">';
+  html += '<div style="display:flex;align-items:flex-start;gap:14px;">';
+  html += '<div style="font-size:32px;">🔍</div>';
+  html += '<div><div style="font-size:15px;font-weight:600;color:var(--gold);margin-bottom:4px;">Análise Inteligente de Oportunidade</div>';
+  html += '<div style="font-size:12px;color:var(--grey);line-height:1.6;">Cole um link do AutoScout24/Mobile.de ou preencha os dados manualmente. A nossa IA pesquisa o mercado português em tempo real, calcula o score de semelhança, identifica comparáveis e gera um veredito automático sobre a oportunidade.</div></div></div></div>';
+
+  // Tabs URL / Manual
+  html += '<div style="display:flex;gap:6px;margin-bottom:14px;">';
+  var ua = analiseTab==='url'?'background:var(--gold);color:#111;border:none;':'background:transparent;color:var(--grey);border:1px solid var(--border);';
+  var ma = analiseTab==='manual'?'background:var(--gold);color:#111;border:none;':'background:transparent;color:var(--grey);border:1px solid var(--border);';
+  html += '<button onclick="setAnaliseTab(\'url\',\''+prefix+'\')" style="'+ua+'padding:8px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">🔗 Por URL</button>';
+  html += '<button onclick="setAnaliseTab(\'manual\',\''+prefix+'\')" style="'+ma+'padding:8px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Manual</button>';
+  html += '</div>';
+
+  // Form
+  html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px;">';
+
+  if(analiseTab==='url'){
+    html += '<div class="fi"><label>URL do anúncio (AutoScout24, Mobile.de)</label>';
+    html += '<input id="anUrl_'+prefix+'" type="text" placeholder="https://www.autoscout24.de/...">';
+    html += '</div>';
+  } else {
+    html += '<div class="fi-row">';
+    html += '<div class="fi"><label>Marca</label><input id="anMarca_'+prefix+'" placeholder="Mercedes-Benz" value="Mercedes-Benz"></div>';
+    html += '<div class="fi"><label>Modelo</label><input id="anModelo_'+prefix+'" placeholder="A 250 e Progressive" value="A 250 e Progressive"></div>';
+    html += '</div>';
+    html += '<div class="fi-row">';
+    html += '<div class="fi"><label>Ano</label><input id="anAno_'+prefix+'" type="number" placeholder="2022" value="2022"></div>';
+    html += '<div class="fi"><label>Quilómetros</label><input id="anKm_'+prefix+'" type="number" placeholder="80000" value="80000"></div>';
+    html += '</div>';
+    html += '<div class="fi-row">';
+    html += '<div class="fi"><label>Combustível</label><select id="anComb_'+prefix+'"><option>Híbrido Plug-In</option><option>Elétrico</option><option>Gasolina</option><option>Diesel</option></select></div>';
+    html += '<div class="fi"><label>Preço DE (sem IVA, EUR)</label><input id="anPreco_'+prefix+'" type="number" placeholder="17500" value="17500"></div>';
+    html += '</div>';
+    html += '<div class="fi"><label>Versão / Equipamentos (opcional)</label><input id="anVersao_'+prefix+'" placeholder="Progressive Leder Navi" value="Progressive"></div>';
+  }
+
+  html += '<button class="btn btn-gold" id="anBtn_'+prefix+'" onclick="runAnalise(\''+prefix+'\')" style="margin-top:10px;width:100%;padding:14px;font-size:14px;">🚀 Analisar Oportunidade</button>';
+  html += '<div id="anStatus_'+prefix+'" style="margin-top:14px;display:none;"></div>';
+  html += '</div>';
+
+  // Container resultado
+  html += '<div id="anResult_'+prefix+'"></div>';
+
+  g(containerId).innerHTML = html;
+}
+
+function setAnaliseTab(tab, prefix){
+  analiseTab = tab;
+  buildAnalise(prefix);
+}
+
+function runAnalise(prefix){
+  var btn = g('anBtn_'+prefix);
+  var statusDiv = g('anStatus_'+prefix);
+  var resultDiv = g('anResult_'+prefix);
+
+  // Recolher dados
+  var inputData = {};
+  if(analiseTab==='url'){
+    var url = g('anUrl_'+prefix).value.trim();
+    if(!url){ showToast('Cole um URL primeiro'); return; }
+    inputData.url = url;
+  } else {
+    inputData.marca = g('anMarca_'+prefix).value.trim();
+    inputData.modelo = g('anModelo_'+prefix).value.trim();
+    inputData.versao = g('anVersao_'+prefix).value.trim();
+    inputData.ano = parseInt(g('anAno_'+prefix).value)||0;
+    inputData.km = parseInt(g('anKm_'+prefix).value)||0;
+    inputData.comb = g('anComb_'+prefix).value;
+    inputData.precoDE = parseInt(g('anPreco_'+prefix).value)||0;
+    if(!inputData.marca||!inputData.modelo||!inputData.precoDE){
+      showToast('Preencha pelo menos marca, modelo e preço');
+      return;
+    }
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ A pesquisar mercado português...';
+  statusDiv.style.display = 'block';
+  statusDiv.innerHTML = '<div style="padding:14px;background:rgba(200,162,78,0.06);border-left:3px solid var(--gold);border-radius:4px;font-size:12px;color:var(--grey);">⏳ A consultar o mercado em tempo real. Isto pode demorar 15-30 segundos...</div>';
+  resultDiv.innerHTML = '';
+
+  // Construir prompt
+  var promptText = buildAnalisePrompt(inputData);
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:3000,
+      tools:[{type:'web_search_20250305',name:'web_search'}],
+      messages:[{role:'user',content:promptText}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.disabled = false;
+    btn.textContent = '🚀 Analisar Oportunidade';
+    statusDiv.style.display = 'none';
+
+    // Extrair texto da resposta (pode haver vários blocos)
+    var fullText = '';
+    if(data.content && Array.isArray(data.content)){
+      data.content.forEach(function(block){
+        if(block.type==='text' && block.text) fullText += block.text + '\n';
+      });
+    }
+    if(!fullText){
+      throw new Error('Resposta vazia da IA');
+    }
+
+    // Tentar extrair JSON
+    var jsonMatch = fullText.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Não foi possível extrair análise estruturada');
+    var result = JSON.parse(jsonMatch[0]);
+    lastAnalise = result;
+    renderAnaliseResult(result, prefix);
+  })
+  .catch(function(err){
+    btn.disabled = false;
+    btn.textContent = '🚀 Analisar Oportunidade';
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = '<div style="padding:14px;background:rgba(229,57,53,0.08);border-left:3px solid var(--red);border-radius:4px;font-size:12px;color:var(--red);">❌ Erro: '+(err.message||'Tente novamente')+'</div>';
+  });
+}
+
+function buildAnalisePrompt(input){
+  var p = 'Es um analista profissional de importacao de veiculos da Alemanha para Portugal. Vou dar-te um veiculo e tu deves:\n\n';
+  p += '1. PESQUISAR a web (Standvirtual, OLX, Carros.pt) por veiculos COMPARAVEIS no mercado portugues\n';
+  p += '2. Identificar 3-5 anuncios reais e atuais com a mesma marca/modelo/ano/equipamento\n';
+  p += '3. Calcular um SCORE DE SEMELHANCA (0-100) baseado em: versao (30pts), kilometros (20pts), ano (15pts), extras (10pts), cor/comercial (5pts) - escala 0-80 entao normalizar para 100\n';
+  p += '4. Calcular o preco medio do mercado PT\n';
+  p += '5. Calcular margem usando esta formula FIXA da plataforma:\n';
+  p += '   Custo Stand = PrecoSemIvaDE + 900 (transporte) + 130 (DEKRA) + 200 (legalizacao) + 1800 (servico GermanImport)\n';
+  p += '   Margem = PrecoMedioPT - CustoStand - ISV\n';
+  p += '   ISV: 177 EUR para PHEV elegivel, 1500 EUR para Diesel, 1200 EUR para Gasolina, 0 para Eletrico\n';
+  p += '6. Dar veredito 🟢 (margem > 3000), 🟡 (margem 1000-3000), 🔴 (margem < 1000)\n';
+  p += '7. Dar uma DICA concreta de negociacao\n\n';
+
+  p += 'VEICULO A ANALISAR:\n';
+  if(input.url){
+    p += 'URL: '+input.url+'\n';
+    p += '(Visita o URL e extrai marca, modelo, ano, km, combustivel, preco)\n';
+  } else {
+    p += 'Marca: '+input.marca+'\n';
+    p += 'Modelo: '+input.modelo+'\n';
+    if(input.versao) p += 'Versao: '+input.versao+'\n';
+    p += 'Ano: '+input.ano+'\n';
+    p += 'Km: '+input.km+'\n';
+    p += 'Combustivel: '+input.comb+'\n';
+    p += 'Preco DE (sem IVA): '+input.precoDE+' EUR\n';
+  }
+
+  p += '\nRESPONDE APENAS com um JSON valido (sem texto antes ou depois) com esta estrutura exata:\n';
+  p += '{\n';
+  p += '  "veiculo": {"marca":"", "modelo":"", "versao":"", "ano":0, "km":0, "comb":"", "precoDE":0},\n';
+  p += '  "score": {"total":0, "versao":0, "km":0, "ano":0, "extras":0, "cor":0, "fiabilidade":""},\n';
+  p += '  "comparaveis": [{"versao":"", "ano":0, "km":0, "preco":0, "fonte":"", "score":0, "notas":""}],\n';
+  p += '  "mercado": {"medio":0, "minimo":0, "maximo":0, "totalAnuncios":0},\n';
+  p += '  "financeiro": {"custoStand":0, "isv":0, "pvpRecomendado":0, "margem":0, "rentabilidade":0},\n';
+  p += '  "veredito": {"emoji":"", "label":"", "descricao":""},\n';
+  p += '  "dica": ""\n';
+  p += '}';
+
+  return p;
+}
+
+function renderAnaliseResult(r, prefix){
+  var container = g('anResult_'+prefix);
+  var v = r.veiculo || {};
+  var s = r.score || {};
+  var m = r.mercado || {};
+  var f = r.financeiro || {};
+  var verd = r.veredito || {};
+
+  var h = '';
+
+  // Header do veiculo
+  h += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px;">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">';
+  h += '<div><div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Análise de Oportunidade</div>';
+  h += '<div style="font-size:20px;font-weight:700;margin-top:4px;">'+(v.marca||'')+' '+(v.modelo||'')+'</div>';
+  h += '<div style="font-size:12px;color:var(--grey);">'+(v.versao||'')+' &middot; '+v.ano+' &middot; '+fmt(v.km)+' km &middot; '+v.comb+'</div></div>';
+  // Score badge
+  var scoreColor = s.total>=70 ? 'var(--green)' : (s.total>=50 ? '#ff9800' : 'var(--red)');
+  h += '<div style="text-align:center;background:rgba(200,162,78,0.08);border:1px solid var(--border);border-radius:8px;padding:12px 18px;">';
+  h += '<div style="font-size:28px;font-weight:700;color:'+scoreColor+';">'+s.total+'%</div>';
+  h += '<div style="font-size:9px;color:var(--grey);text-transform:uppercase;letter-spacing:1px;">Score</div></div>';
+  h += '</div>';
+  h += '</div>';
+
+  // Veredito (destaque grande)
+  var veredictBg, veredictBorder, veredictColor;
+  if(f.margem >= 3000){ veredictBg='rgba(76,175,80,0.1)'; veredictBorder='#4caf50'; veredictColor='#4caf50'; }
+  else if(f.margem >= 1000){ veredictBg='rgba(255,152,0,0.1)'; veredictBorder='#ff9800'; veredictColor='#ff9800'; }
+  else { veredictBg='rgba(229,57,53,0.1)'; veredictBorder='#e53935'; veredictColor='#e53935'; }
+
+  h += '<div style="background:'+veredictBg+';border-left:4px solid '+veredictBorder+';border-radius:8px;padding:18px 20px;margin-bottom:14px;">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">';
+  h += '<div><div style="font-size:13px;color:var(--grey);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Veredito</div>';
+  h += '<div style="font-size:22px;font-weight:700;color:'+veredictColor+';margin-top:4px;">'+(verd.emoji||'')+' '+(verd.label||'')+'</div>';
+  h += '<div style="font-size:12px;color:var(--grey);margin-top:6px;line-height:1.5;">'+(verd.descricao||'')+'</div></div>';
+  h += '<div style="text-align:right;"><div style="font-size:10px;color:var(--grey);text-transform:uppercase;letter-spacing:1px;">Margem Estimada</div>';
+  h += '<div style="font-size:32px;font-weight:700;color:'+veredictColor+';">EUR '+fmt(f.margem)+'</div>';
+  h += '<div style="font-size:11px;color:var(--grey);">Rentabilidade '+f.rentabilidade+'%</div></div>';
+  h += '</div></div>';
+
+  // Grid: Mercado + Financeiro lado a lado
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">';
+
+  // Mercado PT
+  h += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;">';
+  h += '<div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:12px;">📊 Mercado Português</div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Preço médio</span><span style="font-weight:700;color:var(--gold);">EUR '+fmt(m.medio)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Mínimo</span><span>EUR '+fmt(m.minimo)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Máximo</span><span>EUR '+fmt(m.maximo)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-top:1px solid var(--border);margin-top:6px;padding-top:10px;"><span style="color:var(--grey);">Anúncios analisados</span><span>'+m.totalAnuncios+'</span></div>';
+  h += '</div>';
+
+  // Financeiro
+  h += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;">';
+  h += '<div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:12px;">💶 Breakdown Financeiro</div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Preço DE (s/IVA)</span><span>EUR '+fmt(v.precoDE)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">+ Custos importação</span><span>EUR '+fmt(900+130+200+1800)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">+ ISV</span><span>EUR '+fmt(f.isv)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;font-weight:700;border-top:1px solid var(--border);margin-top:6px;padding-top:10px;"><span>Custo total stand</span><span style="color:var(--gold);">EUR '+fmt(f.custoStand+f.isv)+'</span></div>';
+  h += '</div>';
+  h += '</div>';
+
+  // Comparáveis
+  if(r.comparaveis && r.comparaveis.length){
+    h += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;">';
+    h += '<div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:12px;">🔎 Comparáveis Encontrados em Portugal</div>';
+    h += '<div style="overflow-x:auto;"><table style="width:100%;font-size:12px;border-collapse:collapse;">';
+    h += '<thead><tr style="border-bottom:1px solid var(--border);">';
+    h += '<th style="text-align:left;padding:8px 6px;font-size:10px;color:var(--grey);text-transform:uppercase;font-weight:600;">#</th>';
+    h += '<th style="text-align:left;padding:8px 6px;font-size:10px;color:var(--grey);text-transform:uppercase;font-weight:600;">Versão</th>';
+    h += '<th style="text-align:right;padding:8px 6px;font-size:10px;color:var(--grey);text-transform:uppercase;font-weight:600;">Ano</th>';
+    h += '<th style="text-align:right;padding:8px 6px;font-size:10px;color:var(--grey);text-transform:uppercase;font-weight:600;">Km</th>';
+    h += '<th style="text-align:right;padding:8px 6px;font-size:10px;color:var(--grey);text-transform:uppercase;font-weight:600;">Preço</th>';
+    h += '<th style="text-align:right;padding:8px 6px;font-size:10px;color:var(--grey);text-transform:uppercase;font-weight:600;">Score</th>';
+    h += '<th style="text-align:left;padding:8px 6px;font-size:10px;color:var(--grey);text-transform:uppercase;font-weight:600;">Notas</th>';
+    h += '</tr></thead><tbody>';
+    r.comparaveis.forEach(function(c, i){
+      h += '<tr style="border-bottom:1px solid rgba(255,255,255,0.04);">';
+      h += '<td style="padding:10px 6px;color:var(--grey);">'+(i+1)+'</td>';
+      h += '<td style="padding:10px 6px;font-weight:500;">'+c.versao+'</td>';
+      h += '<td style="padding:10px 6px;text-align:right;">'+c.ano+'</td>';
+      h += '<td style="padding:10px 6px;text-align:right;">'+fmt(c.km)+'</td>';
+      h += '<td style="padding:10px 6px;text-align:right;color:var(--gold);font-weight:600;">EUR '+fmt(c.preco)+'</td>';
+      h += '<td style="padding:10px 6px;text-align:right;">'+c.score+'%</td>';
+      h += '<td style="padding:10px 6px;color:var(--grey);font-size:11px;">'+c.notas+'</td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div></div>';
+  }
+
+  // Dica de negociação
+  if(r.dica){
+    h += '<div style="background:linear-gradient(135deg,rgba(200,162,78,0.1),rgba(200,162,78,0.02));border:1px solid rgba(200,162,78,0.3);border-radius:10px;padding:18px;margin-bottom:14px;">';
+    h += '<div style="display:flex;align-items:flex-start;gap:12px;">';
+    h += '<div style="font-size:24px;">💡</div>';
+    h += '<div><div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:4px;">Dica de Negociação</div>';
+    h += '<div style="font-size:13px;color:var(--white);line-height:1.6;">'+r.dica+'</div></div>';
+    h += '</div></div>';
+  }
+
+  // Acoes
+  if(currentUser && currentUser.role==='admin'){
+    h += '<div style="display:flex;gap:10px;flex-wrap:wrap;">';
+    h += '<button class="btn btn-gold" onclick="saveAnaliseAsVehicle()">💾 Guardar como Veículo</button>';
+    h += '<button class="btn btn-ghost" onclick="g(\'anResult_'+prefix+'\').innerHTML=\'\'">Nova análise</button>';
+    h += '</div>';
+  }
+
+  container.innerHTML = h;
+  // Scroll to result
+  setTimeout(function(){ container.scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
+}
+
+function saveAnaliseAsVehicle(){
+  if(!lastAnalise){ showToast('Sem análise para guardar'); return; }
+  var v = lastAnalise.veiculo;
+  var f = lastAnalise.financeiro;
+  var newId = vehicles.length ? Math.max.apply(null, vehicles.map(function(x){return x.id;}))+1 : 1;
+  vehicles.push({
+    id:newId, marca:v.marca, modelo:v.modelo+' '+v.versao, ano:v.ano, km:v.km,
+    comb:v.comb, trans:'Automática', cor:'',
+    desc:'Importado via Análise de Mercado',
+    img:'',
+    precoReal:v.precoDE, markup:0, preco:v.precoDE,
+    transp:900, dekra:130, legal:200, servico:1800, isv:f.isv,
+    pvp:f.pvpRecomendado, status:'Disponivel'
+  });
+  vehicleDocs[newId] = {};
+  DOC_TYPES.forEach(function(dt){vehicleDocs[newId][dt.nome]={status:'missing',url:'',date:'',notes:''};});
+  showToast('Veículo guardado com sucesso!');
 }
 
 // === AI ASSISTANT ===
