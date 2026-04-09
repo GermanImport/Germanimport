@@ -45,41 +45,6 @@ a{color:var(--gold);text-decoration:none;}
 .lang-btn.active{opacity:1;border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 2px rgba(200,162,78,0.2);}
 
 
-.ai-fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#c8a24e,#9d7d36);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(200,162,78,0.4);z-index:9998;display:flex;align-items:center;justify-content:center;font-size:26px;color:#111;transition:all .3s;}
-.ai-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(200,162,78,0.6);}
-.ai-fab.hidden{display:none;}
-.ai-chat{position:fixed;bottom:24px;right:24px;width:380px;max-width:calc(100vw - 32px);height:560px;max-height:calc(100vh - 48px);background:#181818;border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,0.6);z-index:9999;display:none;flex-direction:column;overflow:hidden;}
-.ai-chat.show{display:flex;}
-.ai-chat-header{background:linear-gradient(135deg,rgba(200,162,78,0.15),rgba(200,162,78,0.03));padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.ai-chat-header .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c8a24e,#9d7d36);display:flex;align-items:center;justify-content:center;font-size:18px;color:#111;font-weight:700;}
-.ai-chat-header .info{flex:1;}
-.ai-chat-header .name{font-size:13px;font-weight:600;color:var(--white);}
-.ai-chat-header .status{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px;}
-.ai-chat-header .status::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);}
-.ai-chat-close{background:none;border:none;color:var(--grey);font-size:22px;cursor:pointer;padding:4px 8px;}
-.ai-chat-close:hover{color:var(--white);}
-.ai-chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
-.ai-msg{display:flex;gap:8px;font-size:13px;line-height:1.5;}
-.ai-msg.user{flex-direction:row-reverse;}
-.ai-msg .bubble{max-width:80%;padding:10px 14px;border-radius:14px;}
-.ai-msg.bot .bubble{background:rgba(255,255,255,0.05);color:var(--white);border-bottom-left-radius:4px;}
-.ai-msg.user .bubble{background:var(--gold);color:#111;border-bottom-right-radius:4px;}
-.ai-msg .bubble strong{color:var(--gold);}
-.ai-msg.user .bubble strong{color:#111;}
-.ai-msg .bubble a{color:var(--gold);text-decoration:underline;}
-.ai-typing{display:flex;gap:4px;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:14px;border-bottom-left-radius:4px;width:fit-content;}
-.ai-typing span{width:6px;height:6px;border-radius:50%;background:var(--grey);animation:aiDot 1.4s infinite;}
-.ai-typing span:nth-child(2){animation-delay:.2s;}
-.ai-typing span:nth-child(3){animation-delay:.4s;}
-@keyframes aiDot{0%,60%,100%{opacity:.3;transform:scale(0.8);}30%{opacity:1;transform:scale(1);}}
-.ai-chat-input{border-top:1px solid var(--border);padding:12px;display:flex;gap:8px;background:#111;}
-.ai-chat-input input{flex:1;background:#1f1f1f;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--white);font-size:13px;font-family:inherit;}
-.ai-chat-input input:focus{outline:none;border-color:var(--gold);}
-.ai-chat-input button{background:var(--gold);color:#111;border:none;border-radius:8px;padding:0 16px;cursor:pointer;font-weight:600;font-size:13px;}
-.ai-chat-input button:disabled{opacity:0.4;cursor:not-allowed;}
-.ai-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;}
-.ai-suggestions button{background:rgba(200,162,78,0.1);border:1px solid rgba(200,162,78,0.3);color:var(--gold);font-size:11px;padding:6px 10px;border-radius:14px;cursor:pointer;font-family:inherit;}
-.ai-suggestions button:hover{background:rgba(200,162,78,0.2);}
 .menu-toggle{background:none;border:none;color:var(--white);font-size:22px;cursor:pointer;display:none;}
 
 .sidebar{width:240px;background:var(--dark);border-right:1px solid var(--border);position:fixed;top:90px;bottom:0;left:0;overflow-y:auto;z-index:90;transition:transform .3s;}
@@ -151,20 +116,6 @@ a{color:var(--gold);text-decoration:none;}
 .fi textarea{min-height:80px;resize:vertical;}
 .fi-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
-/* ── AI IMPORT ── */
-.ai-import-box{background:var(--gold-dim);border:1px solid var(--border);border-radius:6px;padding:18px;margin-bottom:18px;}
-.ai-title{font-size:13px;font-weight:500;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-.ai-import-row{display:flex;gap:8px;}
-.ai-import-row input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
-.ai-import-row input:focus{border-color:var(--gold);}
-.ai-import-btn{background:var(--gold);color:var(--black);border:none;padding:10px 18px;border-radius:3px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;}
-.ai-import-btn:disabled{opacity:.6;cursor:not-allowed;}
-.ai-status{margin-top:10px;font-size:13px;color:var(--grey);display:none;align-items:center;gap:8px;}
-.ai-status.show{display:flex;}
-.ai-spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:aispin .8s linear infinite;flex-shrink:0;}
-@keyframes aispin{to{transform:rotate(360deg);}}
-.ai-status.error{color:var(--red);}
-.ai-status.success{color:var(--green);}
 
 /* ── WHATSAPP ── */
 .wa-btn{background:#25D366;color:#fff;border:none;padding:8px 14px;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
@@ -775,19 +726,12 @@ function doLogin(){
   buildSidebar();
   if(user.role==='admin'){showPage('dashboard');}
   else{showPage('oportunidades');}
-  // Mostrar assistente AI
-  var fab=g('aiFab');if(fab)fab.classList.remove('hidden');
 }
 function doLogout(){
   currentUser=null;
   g('loginOverlay').style.display='flex';
   g('app').style.display='none';
   g('lEmail').value='';g('lPass').value='';
-  // Esconder assistente AI
-  var fab=g('aiFab');if(fab)fab.classList.add('hidden');
-  var chat=g('aiChat');if(chat)chat.classList.remove('show');
-  aiOpen=false;
-  aiHistory=[];
 }
 
 // === SIDEBAR ===
@@ -1086,76 +1030,6 @@ function saveVehicle(){
   closeModal('vehicleModal');
   renderVehicles();
   showToast('Veículo guardado!');
-}
-
-// === AI IMPORT ===
-function importFromUrl(){
-  var url=g('aiUrl').value.trim();
-  if(!url){showToast('Colé um link primeiro');return;}
-  var btn=g('aiBtn');
-  var status=g('aiStatus');
-  var spinner=g('aiSpinner');
-  var statusText=g('aiStatusText');
-  btn.disabled=true;
-  spinner.style.display='block';
-  status.className='ai-status show';
-  statusText.textContent='A analisar o anuncio...';
-
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1000,
-      messages:[{role:'user',content:'Analisa este link de um anuncio de carro alemao e extrai os dados em JSON: {marca, modelo, ano, km, comb (Gasolina/Diesel/Híbrido Plug-In/Elétrico), cor, trans (Automática/Manual), desc, img (URL da foto), preco (numero inteiro em EUR - o preco bruto/total que aparece no anuncio, tipicamente com IVA 19% incluido)}. Apenas o JSON, sem texto adicional. Link: '+url}]
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var text='';
-    if(data.content&&data.content[0])text=data.content[0].text||'';
-    var jsonMatch=text.match(/\{[\s\S]*\}/);
-    if(!jsonMatch)throw new Error('Não foi possível extrair dados.');
-    var d=JSON.parse(jsonMatch[0]);
-    if(d.marca)g('vMarca').value=d.marca;
-    if(d.modelo)g('vModelo').value=d.modelo;
-    if(d.ano)g('vAno').value=d.ano;
-    if(d.km)g('vKm').value=d.km;
-    if(d.comb)g('vComb').value=d.comb;
-    if(d.cor)g('vCor').value=d.cor;
-    if(d.trans)g('vTrans').value=d.trans;
-    if(d.desc)g('vDesc').value=d.desc;
-    if(d.img)g('vImg').value=d.img;
-    if(d.preco){
-      // Anuncios DE trazem sempre preço c/IVA 19% - converter para sem IVA
-      var precoComIva=parseInt(d.preco)||0;
-      var precoSemIva=Math.round(precoComIva/1.19);
-      g('vPrecoReal').value=precoSemIva;
-      var isvEst=0;
-      if(d.comb==='Híbrido Plug-In')isvEst=177;
-      else if(d.comb==='Elétrico')isvEst=0;
-      else if(d.comb==='Diesel')isvEst=1500;
-      else isvEst=1200;
-      g('vIsv').value=isvEst;
-      // Mostrar conversao ao utilizador
-      window._lastImportPrice={comIva:precoComIva,semIva:precoSemIva};
-    }
-    spinner.style.display='none';
-    status.className='ai-status show success';
-    var msg='Dados importados com sucesso!';
-    if(window._lastImportPrice){
-      msg+=' Preço convertido: '+fmt(window._lastImportPrice.comIva)+' EUR c/IVA → '+fmt(window._lastImportPrice.semIva)+' EUR sem IVA (/1.19).';
-    }
-    statusText.textContent=msg;
-    btn.disabled=false;
-    showToast('Ficha preenchida automaticamente');
-  })
-  .catch(function(err){
-    spinner.style.display='none';
-    status.className='ai-status show error';
-    statusText.textContent='Erro: '+(err.message||'Tente preencher manualmente.');
-    btn.disabled=false;
-  });
 }
 
 // === STANDS ===
@@ -2466,6 +2340,8 @@ function renderAnaliseResult(r, prefix){
   if(currentUser && currentUser.role==='admin'){
     h += '<div style="display:flex;gap:10px;flex-wrap:wrap;">';
     h += '<button class="btn btn-gold" onclick="saveAnaliseAsVehicle()">💾 Guardar como Veículo</button>';
+    h += '<button class="btn btn-ghost" onclick="exportAnalisePdf()">📄 Exportar PDF</button>';
+    h += '<button class="btn btn-ghost" onclick="exportAnaliseNotion()">📝 Copiar p/ Notion</button>';
     h += '<button class="btn btn-ghost" onclick="g(\'anResult\').innerHTML=\'\';g(\'anJsonInput\').value=\'\'">Nova análise</button>';
     h += '</div>';
   }
@@ -2481,128 +2357,185 @@ function saveAnaliseAsVehicle(){
   var f = lastAnalise.financeiro;
   var newId = vehicles.length ? Math.max.apply(null, vehicles.map(function(x){return x.id;}))+1 : 1;
   vehicles.push({
-    id:newId, marca:v.marca, modelo:v.modelo+' '+v.versao, ano:v.ano, km:v.km,
+    id:newId, marca:v.marca, modelo:v.modelo+' '+(v.versao||''), ano:v.ano, km:v.km,
     comb:v.comb, trans:'Automática', cor:'',
     desc:'Importado via Análise de Mercado',
     img:'',
     precoReal:v.precoDE, markup:0, preco:v.precoDE,
-    transp:900, dekra:130, legal:200, servico:1800, isv:f.isv,
-    pvp:f.pvpRecomendado, status:'Disponivel'
+    transp:900, dekra:130, legal:200, servico:1800, isv:f.isv||0,
+    pvp:f.pvpRecomendado||0, status:'Disponivel'
   });
   vehicleDocs[newId] = {};
   DOC_TYPES.forEach(function(dt){vehicleDocs[newId][dt.nome]={status:'missing',url:'',date:'',notes:''};});
-  showToast('Veículo guardado com sucesso!');
+  showToast('Veículo #'+newId+' guardado no catálogo!');
+  // Refresh vehicles grid if visible
+  if(g('vehicleGrid') && g('pg-veiculos').classList.contains('active')) renderVehicles();
 }
 
-// === AI ASSISTANT ===
-var AI_SYSTEM_PROMPT='Es o Assistente GermanImport, um agente de apoio ao cliente da plataforma B2B GermanImport - especializada em importacao de veiculos premium da Alemanha para Portugal. Respondes sempre em portugues de Portugal, de forma profissional, breve e clara (maximo 4-5 frases por resposta). Usa **negrito** com asteriscos para destacar valores importantes.\n\n=== MAPA DO SITE ===\nA plataforma tem dois perfis:\n1) ADMIN: Dashboard, Veiculos (gestao do catalogo), Stands (parceiros), Reservas, Calculadora, Simulador ISV, Documentacao, Seguimento de Entrega.\n2) STAND PARCEIRO: Oportunidades (veiculos disponiveis), Minhas Reservas, Calculadora, Simulador ISV, Documentacao, Seguimento, Guia do Parceiro, Meu Perfil.\n\n=== ESTRUTURA DE CUSTOS (BLOQUEADA) ===\n- Preco do veiculo: negociado caso a caso (sem IVA alemao)\n- Transporte DE-PT: 900 EUR\n- Inspecao DEKRA: 130 EUR\n- Legalizacao IMT: 200 EUR\n- Servico GermanImport: 1.800 EUR + IVA 23%\n- ISV: liquidado separadamente na matricula (varia por veiculo)\nFormula: Custo Stand = Preco sem IVA + 900 + 130 + 200 + 1800 (se IVA dedutivel) ou +2214 (se nao dedutivel). Margem = (PVP/1.23) - Custo Stand.\n\n=== IVA DO SERVICO ===\nO IVA (23%) sobre o servico GermanImport PODE ser dedutivel para stands que cumpram TODAS as condicoes: CAE 45110 (comercio de veiculos), regime normal de IVA, fatura com NIF da empresa, e servico diretamente afeto a atividade tributada. ATENCAO: se o veiculo for vendido pelo Regime da Margem de Lucro, a deducao do IVA do servico pode nao ser permitida para essa viatura. Recomendar sempre consultar o contabilista para confirmar o enquadramento fiscal aplicavel ao caso especifico.\n\n=== PROCESSO DE 10 ETAPAS ===\n1. Selecao do Veiculo (em Oportunidades)\n2. Pagamento do Sinal (descontado no total)\n3. Inspecao DEKRA na Alemanha (validacao tecnica)\n4. Reserva Confirmada\n5. Pagamento da Viatura\n6. Aquisicao na Alemanha\n7. Documentacao Alema (Abmeldung)\n8. Transporte DE-PT (7-10 dias uteis)\n9. Chegada e Legalizacao Portugal (5-8 dias uteis)\n10. Entrega ao Stand. Prazo total medio: 3-5 semanas.\n\n=== ISV 2026 (Tabelas oficiais AT) ===\nLigeiros passageiros: componente cilindrada (Tabela A) + componente CO2 (gasolina/diesel WLTP/NEDC). Reducao por idade: 10% (1 ano) ate 80% (10+ anos).\nPHEV - Taxa intermedia 25% se elegivel:\n- Matricula 2015-2020: autonomia >=25km\n- Matricula 2021-2025: autonomia >=50km E CO2 <50 g/km\n- Matricula 2026+: autonomia >=50km E CO2 <=80 g/km (Euro 6e-bis)\nEletricos: 100% isentos. Diesel: agravamento de 500 EUR se particulas >=0.001g/km.\n\n=== DOCUMENTACAO (4 fases) ===\nFase 1 - Validacao Tecnica: Relatorio DEKRA + COC\nFase 2 - Aquisicao Alemanha: Contrato + Fatura\nFase 3 - Documentacao Alema: Abmeldung\nFase 4 - Legalizacao Portugal: Documentos IMT (DAV, DUC, matricula)\n\n=== FAQ COMUM ===\n- IVA do servico: ver seccao IVA do Servico acima - SEMPRE recomendar consultar contabilista\n- Inspecao DEKRA detalha eventuais problemas; em caso de problemas significativos pode haver reembolso integral do sinal\n- A GermanImport trata de toda a legalizacao portuguesa (DAV, ISV, matricula, IMT)\n- Contacto: info@germanimport.online\n\n=== REGRAS ===\n- Se nao souberes a resposta, sugere contactar info@germanimport.online\n- Quando o utilizador pergunta onde encontrar algo na plataforma, indica o nome exato do menu\n- Para calculos especificos (ISV de um carro concreto), recomenda usar o Simulador ISV no menu\n- Para questoes fiscais especificas (IVA, regimes), recomenda sempre consultar o contabilista\n- Nunca inventes precos ou prazos diferentes dos indicados acima\n- Nunca afirmes categoricamente que o IVA e dedutivel - sempre menciona as condicoes';
+function exportAnalisePdf(){
+  if(!lastAnalise){ showToast('Sem análise para exportar'); return; }
+  var r = lastAnalise;
+  var v = r.veiculo||{};
+  var s = r.score||{};
+  var m = r.mercado||{};
+  var f = r.financeiro||{};
+  var verd = r.veredito||{};
+  var comps = r.comparaveis||[];
+  var today = new Date().toLocaleDateString('pt-PT');
 
-var aiHistory=[];
-var aiOpen=false;
+  var w = window.open('','_blank');
+  var h = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Análise '+v.marca+' '+v.modelo+'</title><style>';
+  h += 'body{font-family:Arial,sans-serif;max-width:800px;margin:20px auto;padding:20px;color:#222;line-height:1.5;}';
+  h += 'h1{color:#c8a24e;border-bottom:2px solid #c8a24e;padding-bottom:8px;margin-bottom:4px;}';
+  h += 'h2{color:#c8a24e;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-top:24px;border-bottom:1px solid #ddd;padding-bottom:4px;}';
+  h += '.sub{color:#666;font-size:12px;margin-bottom:16px;}';
+  h += '.box{background:#f8f5ec;border-left:4px solid #c8a24e;padding:14px;margin:12px 0;border-radius:4px;}';
+  h += '.big{font-size:28px;font-weight:bold;color:#c8a24e;}';
+  h += 'table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px;}';
+  h += 'th{background:#f0ebd8;text-align:left;padding:8px;border-bottom:2px solid #c8a24e;}';
+  h += 'td{padding:8px;border-bottom:1px solid #eee;}';
+  h += '.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;}';
+  h += '.label{color:#666;}';
+  h += '.verd-green{background:#e8f5e9;border-left:4px solid #4caf50;padding:14px;margin:12px 0;border-radius:4px;}';
+  h += '.verd-orange{background:#fff3e0;border-left:4px solid #ff9800;padding:14px;margin:12px 0;border-radius:4px;}';
+  h += '.verd-red{background:#ffebee;border-left:4px solid #e53935;padding:14px;margin:12px 0;border-radius:4px;}';
+  h += '.footer{margin-top:30px;padding-top:14px;border-top:1px solid #ddd;font-size:10px;color:#888;text-align:center;}';
+  h += '@media print{body{margin:0;}}';
+  h += '</style></head><body>';
+  h += '<div style="text-align:center;margin-bottom:20px;"><div style="font-size:22px;font-weight:bold;color:#c8a24e;">GermanImport</div><div style="font-size:11px;color:#888;">Análise de Oportunidade de Importação</div></div>';
+  h += '<h1>'+v.marca+' '+v.modelo+'</h1>';
+  h += '<div class="sub">'+(v.versao||'')+' · '+v.ano+' · '+fmt(v.km)+' km · '+v.comb+' · Data: '+today+'</div>';
 
-function aiToggle(){
-  aiOpen=!aiOpen;
-  var chat=g('aiChat'),fab=g('aiFab');
-  if(aiOpen){
-    chat.classList.add('show');
-    fab.classList.add('hidden');
-    if(aiHistory.length===0)aiWelcome();
-    setTimeout(function(){g('aiInput').focus();},100);
+  // Score
+  h += '<div class="box"><div class="label">Score de Semelhança</div><div class="big">'+s.total+'%</div><div style="font-size:11px;color:#666;">'+(s.fiabilidade||'')+'</div></div>';
+
+  // Veredito
+  var verdClass = f.margem>=3000?'verd-green':(f.margem>=1000?'verd-orange':'verd-red');
+  h += '<div class="'+verdClass+'"><div style="font-size:11px;text-transform:uppercase;color:#666;letter-spacing:1px;">Veredito</div>';
+  h += '<div style="font-size:20px;font-weight:bold;margin:6px 0;">'+(verd.emoji||'')+' '+(verd.label||'')+'</div>';
+  h += '<div style="font-size:12px;color:#555;">'+(verd.descricao||'')+'</div>';
+  h += '<div style="margin-top:10px;font-size:24px;font-weight:bold;">Margem: €'+fmt(f.margem)+' ('+f.rentabilidade+'%)</div></div>';
+
+  h += '<h2>📊 Mercado Português</h2>';
+  h += '<div class="row"><span class="label">Preço médio</span><span><strong>€'+fmt(m.medio)+'</strong></span></div>';
+  h += '<div class="row"><span class="label">Mínimo</span><span>€'+fmt(m.minimo)+'</span></div>';
+  h += '<div class="row"><span class="label">Máximo</span><span>€'+fmt(m.maximo)+'</span></div>';
+  h += '<div class="row"><span class="label">Anúncios analisados</span><span>'+m.totalAnuncios+'</span></div>';
+
+  h += '<h2>💶 Breakdown Financeiro</h2>';
+  h += '<div class="row"><span class="label">Preço DE (s/IVA)</span><span>€'+fmt(v.precoDE)+'</span></div>';
+  h += '<div class="row"><span class="label">Transporte DE→PT</span><span>€900</span></div>';
+  h += '<div class="row"><span class="label">DEKRA</span><span>€130</span></div>';
+  h += '<div class="row"><span class="label">Legalização IMT</span><span>€200</span></div>';
+  h += '<div class="row"><span class="label">Serviço GermanImport</span><span>€1.800</span></div>';
+  h += '<div class="row"><span class="label">ISV</span><span>€'+fmt(f.isv)+'</span></div>';
+  h += '<div class="row" style="font-weight:bold;border-top:2px solid #c8a24e;margin-top:6px;"><span>Custo Total Stand</span><span>€'+fmt(f.custoStand+f.isv)+'</span></div>';
+  h += '<div class="row" style="font-weight:bold;"><span>PVP Recomendado</span><span>€'+fmt(f.pvpRecomendado)+'</span></div>';
+
+  if(comps.length){
+    h += '<h2>🔎 Comparáveis em Portugal</h2>';
+    h += '<table><thead><tr><th>#</th><th>Versão</th><th>Ano</th><th>Km</th><th>Preço</th><th>Score</th><th>Notas</th></tr></thead><tbody>';
+    comps.forEach(function(c,i){
+      h += '<tr><td>'+(i+1)+'</td><td>'+c.versao+'</td><td>'+c.ano+'</td><td>'+fmt(c.km)+'</td><td>€'+fmt(c.preco)+'</td><td>'+c.score+'%</td><td style="font-size:11px;color:#666;">'+c.notas+'</td></tr>';
+    });
+    h += '</tbody></table>';
+  }
+
+  if(r.dica){
+    h += '<h2>💡 Dica de Negociação</h2>';
+    h += '<div class="box">'+r.dica+'</div>';
+  }
+
+  h += '<div class="footer">GermanImport · info@germanimport.online · Análise gerada em '+today+'</div>';
+  h += '<script>window.onload=function(){window.print();}<\/script>';
+  h += '</body></html>';
+
+  w.document.write(h);
+  w.document.close();
+}
+
+function exportAnaliseNotion(){
+  if(!lastAnalise){ showToast('Sem análise para exportar'); return; }
+  var r = lastAnalise;
+  var v = r.veiculo||{};
+  var s = r.score||{};
+  var m = r.mercado||{};
+  var f = r.financeiro||{};
+  var verd = r.veredito||{};
+  var comps = r.comparaveis||[];
+  var today = new Date().toLocaleDateString('pt-PT');
+
+  var md = '# 🚗 '+v.marca+' '+v.modelo+'\n\n';
+  md += '**'+(v.versao||'')+'** · '+v.ano+' · '+fmt(v.km)+' km · '+v.comb+'\n\n';
+  md += '> 📅 Análise de '+today+'\n\n';
+  md += '---\n\n';
+
+  md += '## 🎯 Veredito\n\n';
+  md += '### '+(verd.emoji||'')+' '+(verd.label||'')+'\n\n';
+  md += (verd.descricao||'')+'\n\n';
+  md += '| Métrica | Valor |\n|---|---|\n';
+  md += '| **Margem** | €'+fmt(f.margem)+' |\n';
+  md += '| **Rentabilidade** | '+f.rentabilidade+'% |\n';
+  md += '| **Score Semelhança** | '+s.total+'% |\n';
+  md += '| **Fiabilidade** | '+(s.fiabilidade||'')+' |\n\n';
+
+  md += '## 📊 Mercado Português\n\n';
+  md += '| | |\n|---|---|\n';
+  md += '| Preço Médio PT | **€'+fmt(m.medio)+'** |\n';
+  md += '| Mínimo | €'+fmt(m.minimo)+' |\n';
+  md += '| Máximo | €'+fmt(m.maximo)+' |\n';
+  md += '| Anúncios analisados | '+m.totalAnuncios+' |\n\n';
+
+  md += '## 💶 Breakdown Financeiro\n\n';
+  md += '| Item | Valor |\n|---|---|\n';
+  md += '| Preço DE (s/IVA) | €'+fmt(v.precoDE)+' |\n';
+  md += '| Transporte DE→PT | €900 |\n';
+  md += '| DEKRA | €130 |\n';
+  md += '| Legalização IMT | €200 |\n';
+  md += '| Serviço GermanImport | €1.800 |\n';
+  md += '| ISV | €'+fmt(f.isv)+' |\n';
+  md += '| **Custo Total Stand** | **€'+fmt(f.custoStand+f.isv)+'** |\n';
+  md += '| **PVP Recomendado** | **€'+fmt(f.pvpRecomendado)+'** |\n\n';
+
+  if(comps.length){
+    md += '## 🔎 Comparáveis em Portugal\n\n';
+    md += '| # | Versão | Ano | Km | Preço | Score | Notas |\n|---|---|---|---|---|---|---|\n';
+    comps.forEach(function(c,i){
+      md += '| '+(i+1)+' | '+c.versao+' | '+c.ano+' | '+fmt(c.km)+' | €'+fmt(c.preco)+' | '+c.score+'% | '+c.notas+' |\n';
+    });
+    md += '\n';
+  }
+
+  if(r.dica){
+    md += '## 💡 Dica de Negociação\n\n';
+    md += '> '+r.dica+'\n\n';
+  }
+
+  md += '---\n\n';
+  md += '*GermanImport · info@germanimport.online*\n';
+
+  // Copy to clipboard
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(md).then(function(){
+      showToast('Markdown copiado! Cola no Notion (Ctrl+V)');
+    }).catch(function(){
+      fallbackCopyNotion(md);
+    });
   } else {
-    chat.classList.remove('show');
-    fab.classList.remove('hidden');
+    fallbackCopyNotion(md);
   }
 }
 
-function aiWelcome(){
-  var msgs=g('aiMsgs');
-  msgs.innerHTML='';
-  aiAddMsg('bot','Ola! Sou o assistente da GermanImport. Posso ajudar com **dúvidas sobre o processo**, **custos**, **ISV**, **documentação** ou navegação na plataforma. Como posso ajudar?');
-  // Suggestions
-  var sug=g('aiSuggestions');
-  sug.innerHTML='';
-  var suggestions=[
-    'Quanto demora o processo?',
-    'Como funciona o ISV PHEV?',
-    'Quais os custos envolvidos?',
-    'Onde vejo os meus veículos?'
-  ];
-  suggestions.forEach(function(s){
-    var b=document.createElement('button');
-    b.textContent=s;
-    b.onclick=function(){g('aiInput').value=s;aiSend();};
-    sug.appendChild(b);
-  });
-}
-
-function aiAddMsg(role,text){
-  var msgs=g('aiMsgs');
-  var div=document.createElement('div');
-  div.className='ai-msg '+role;
-  var bub=document.createElement('div');
-  bub.className='bubble';
-  // Markdown simples: **bold** -> <strong>
-  bub.innerHTML=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-  div.appendChild(bub);
-  msgs.appendChild(div);
-  msgs.scrollTop=msgs.scrollHeight;
-}
-
-function aiShowTyping(){
-  var msgs=g('aiMsgs');
-  var div=document.createElement('div');
-  div.className='ai-msg bot';
-  div.id='aiTyping';
-  div.innerHTML='<div class="ai-typing"><span></span><span></span><span></span></div>';
-  msgs.appendChild(div);
-  msgs.scrollTop=msgs.scrollHeight;
-}
-function aiHideTyping(){
-  var t=document.getElementById('aiTyping');
-  if(t)t.parentNode.removeChild(t);
-}
-
-function aiSend(){
-  var input=g('aiInput');
-  var text=input.value.trim();
-  if(!text)return;
-  input.value='';
-  // Limpar sugestoes apos primeira interacao
-  g('aiSuggestions').innerHTML='';
-  aiAddMsg('user',text);
-  aiHistory.push({role:'user',content:text});
-  aiShowTyping();
-  g('aiSendBtn').disabled=true;
-
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:500,
-      system:AI_SYSTEM_PROMPT,
-      messages:aiHistory
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    aiHideTyping();
-    g('aiSendBtn').disabled=false;
-    var reply='';
-    if(data.content&&data.content[0]&&data.content[0].text){
-      reply=data.content[0].text;
-    } else {
-      reply='Desculpe, ocorreu um erro. Tente novamente ou contacte **info@germanimport.online**.';
-    }
-    aiAddMsg('bot',reply);
-    aiHistory.push({role:'assistant',content:reply});
-    g('aiInput').focus();
-  })
-  .catch(function(err){
-    aiHideTyping();
-    g('aiSendBtn').disabled=false;
-    aiAddMsg('bot','Desculpe, nao consegui ligar ao servidor. Por favor contacte **info@germanimport.online** ou tente novamente.');
-  });
+function fallbackCopyNotion(txt){
+  var ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); showToast('Markdown copiado! Cola no Notion'); }
+  catch(e){ showToast('Erro ao copiar'); }
+  document.body.removeChild(ta);
 }
 
 // === INIT ===
@@ -2614,16 +2547,6 @@ requestAnimationFrame(function(){
   g('lEmail').focus();
 });
 </script>
-
-    <button class="ai-chat-close" onclick="aiToggle()">×</button>
-  </div>
-  <div id="aiMsgs" class="ai-chat-msgs"></div>
-  <div id="aiSuggestions" class="ai-suggestions"></div>
-  <div class="ai-chat-input">
-    <input id="aiInput" type="text" placeholder="Escreva a sua dúvida..." onkeypress="if(event.key==='Enter')aiSend()">
-    <button id="aiSendBtn" onclick="aiSend()">Enviar</button>
-  </div>
-</div>
 
 </body>
 </html>
