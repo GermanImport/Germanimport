@@ -44,7 +44,7 @@ a{color:var(--gold);text-decoration:none;}
 .lang-btn:hover{opacity:1;background:rgba(200,162,78,0.15);border-color:var(--gold);}
 .lang-btn.active{opacity:1;border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 2px rgba(200,162,78,0.2);}
 
-/* === AI ASSISTANT WIDGET === */
+
 .ai-fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#c8a24e,#9d7d36);border:none;cursor:pointer;box-shadow:0 4px 20px rgba(200,162,78,0.4);z-index:9998;display:flex;align-items:center;justify-content:center;font-size:26px;color:#111;transition:all .3s;}
 .ai-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(200,162,78,0.6);}
 .ai-fab.hidden{display:none;}
@@ -358,7 +358,7 @@ a{color:var(--gold);text-decoration:none;}
     </div>
 
     <div class="page" id="pg-analise">
-      <div class="ph"><div><h1>Análise de Mercado</h1><p>Avalie oportunidades de importação cruzando dados DE com mercado PT</p></div></div>
+      <div class="ph"><div><h1>🔍 Análise de Mercado</h1><p>Ferramenta de avaliação de oportunidades via Claude.ai</p></div></div>
       <div id="analiseContent"></div>
     </div>
 
@@ -396,11 +396,6 @@ a{color:var(--gold);text-decoration:none;}
       <div id="standIsvContent"></div>
     </div>
 
-    <div class="page" id="pg-standAnalise">
-      <div class="ph"><div><h1>Análise de Mercado</h1><p>Avalie oportunidades de importação cruzando dados DE com mercado PT</p></div></div>
-      <div id="standAnaliseContent"></div>
-    </div>
-
     <div class="page" id="pg-standDocs">
       <div class="ph"><div><h1 data-i18n="pgStandDocs">Documentação</h1><p data-i18n="pgStandDocsSub">Documentos dos seus veículos</p></div></div>
       <div id="standDocsGrid" class="doc-grid"></div>
@@ -427,14 +422,6 @@ a{color:var(--gold);text-decoration:none;}
 <div id="vehicleModal" class="modal-bg">
   <div class="modal modal-wide">
     <h2 id="vModalTitle">Novo Veículo</h2>
-    <div class="ai-import-box">
-      <div class="ai-title">Importar via Link (AutoScout24 / Mobile.de)</div>
-      <div class="ai-import-row">
-        <input id="aiUrl" type="text" placeholder="Colé o link do anuncio...">
-        <button class="ai-import-btn" id="aiBtn" onclick="importFromUrl()">Importar</button>
-      </div>
-      <div id="aiStatus" class="ai-status"><div class="ai-spinner" id="aiSpinner"></div><span id="aiStatusText"></span></div>
-    </div>
     <input type="hidden" id="vEditId" value="">
     <div class="fi-row">
       <div class="fi"><label>Marca</label><input id="vMarca" placeholder="Ex: Mercedes"></div>
@@ -816,7 +803,7 @@ function buildSidebar(){
     h+='<div class="sb-sec">'+t('sbFerramentas')+'</div>';
     h+='<div class="ni" onclick="showPage(\'calc\',this);buildCalc()"><span class="ni-icon">🧮</span> '+t('niCalc')+'</div>';
     h+='<div class="ni" onclick="showPage(\'isv\',this);buildISV(\'isvContent\')"><span class="ni-icon">💰</span> '+t('niISV')+'</div>';
-    h+='<div class="ni" onclick="showPage(\'analise\',this);buildAnalise(\'analise\')"><span class="ni-icon">🔍</span> '+t('niAnalise')+'</div>';
+    h+='<div class="ni" onclick="showPage(\'analise\',this);buildAnalise()"><span class="ni-icon">🔍</span> '+t('niAnalise')+'</div>';
     h+='<div class="ni" onclick="showPage(\'docs\',this);renderDocs()"><span class="ni-icon">📁</span> '+t('niDocs')+'</div>';
     h+='<div class="ni" onclick="showPage(\'tracking\',this);renderTracking()"><span class="ni-icon">🚚</span> '+t('niTracking')+'</div>';
   } else {
@@ -826,7 +813,6 @@ function buildSidebar(){
     h+='<div class="sb-sec">'+t('sbFerramentas')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standCalc\',this);buildStandCalc()"><span class="ni-icon">🧮</span> '+t('niCalc')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standIsv\',this);buildISV(\'standIsvContent\')"><span class="ni-icon">💰</span> '+t('niISV')+'</div>';
-    h+='<div class="ni" onclick="showPage(\'standAnalise\',this);buildAnalise(\'standAnalise\')"><span class="ni-icon">🔍</span> '+t('niAnalise')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standDocs\',this);renderStandDocs()"><span class="ni-icon">📁</span> '+t('niDocs')+'</div>';
     h+='<div class="ni" onclick="showPage(\'standTracking\',this);renderStandTracking()"><span class="ni-icon">🚚</span> '+t('niTracking')+'</div>';
     h+='<div class="sb-sec">'+t('sbApoio')+'</div>';
@@ -2160,141 +2146,179 @@ function buildPerfil(){
     '</div>';
 }
 
-// === ANÁLISE DE MERCADO (Opportunity Analyzer) ===
+// === ANÁLISE DE MERCADO (fluxo Claude.ai - admin only) ===
 var analiseTab = 'url'; // 'url' ou 'manual'
 var lastAnalise = null;
 
-function buildAnalise(prefix){
-  var containerId = prefix==='analise' ? 'analiseContent' : 'standAnaliseContent';
+function buildAnalise(){
   var html = '';
 
   // Header introdutório
-  html += '<div style="background:linear-gradient(135deg,rgba(200,162,78,0.08),rgba(200,162,78,0.02));border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:18px;">';
+  html += '<div style="background:linear-gradient(135deg,rgba(200,162,78,0.1),rgba(200,162,78,0.02));border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:18px;">';
   html += '<div style="display:flex;align-items:flex-start;gap:14px;">';
   html += '<div style="font-size:32px;">🔍</div>';
-  html += '<div><div style="font-size:15px;font-weight:600;color:var(--gold);margin-bottom:4px;">Análise Inteligente de Oportunidade</div>';
-  html += '<div style="font-size:12px;color:var(--grey);line-height:1.6;">Cole um link do AutoScout24/Mobile.de ou preencha os dados manualmente. A nossa IA pesquisa o mercado português em tempo real, calcula o score de semelhança, identifica comparáveis e gera um veredito automático sobre a oportunidade.</div></div></div></div>';
+  html += '<div style="flex:1;"><div style="font-size:15px;font-weight:600;color:var(--gold);margin-bottom:6px;">Análise de Oportunidade via Claude.ai</div>';
+  html += '<div style="font-size:12px;color:var(--grey);line-height:1.6;">Preenche os dados do veículo abaixo, copia o prompt gerado, cola-o no Claude.ai, recebe a análise em JSON e cola-a de volta aqui para ver o relatório visual completo.</div>';
+  html += '</div></div></div>';
 
-  // Tabs URL / Manual
+  // Fluxo em 4 passos
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:18px;">';
+  var steps = [
+    {n:1, t:'Preencher dados', i:'📝'},
+    {n:2, t:'Copiar prompt', i:'📋'},
+    {n:3, t:'Colar no Claude.ai', i:'🤖'},
+    {n:4, t:'Colar JSON de volta', i:'📥'}
+  ];
+  steps.forEach(function(s){
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">';
+    html += '<div style="font-size:20px;margin-bottom:4px;">'+s.i+'</div>';
+    html += '<div style="font-size:10px;color:var(--gold);font-weight:600;">PASSO '+s.n+'</div>';
+    html += '<div style="font-size:11px;color:var(--grey);margin-top:2px;">'+s.t+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // PASSO 1: Form com tabs URL/Manual
+  html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px;">';
+  html += '<div style="font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:12px;">📝 Passo 1 · Dados do Veículo</div>';
+
+  // Tabs
   html += '<div style="display:flex;gap:6px;margin-bottom:14px;">';
   var ua = analiseTab==='url'?'background:var(--gold);color:#111;border:none;':'background:transparent;color:var(--grey);border:1px solid var(--border);';
   var ma = analiseTab==='manual'?'background:var(--gold);color:#111;border:none;':'background:transparent;color:var(--grey);border:1px solid var(--border);';
-  html += '<button onclick="setAnaliseTab(\'url\',\''+prefix+'\')" style="'+ua+'padding:8px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">🔗 Por URL</button>';
-  html += '<button onclick="setAnaliseTab(\'manual\',\''+prefix+'\')" style="'+ma+'padding:8px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Manual</button>';
+  html += '<button onclick="setAnaliseTab(\'url\')" style="'+ua+'padding:8px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">🔗 Por URL</button>';
+  html += '<button onclick="setAnaliseTab(\'manual\')" style="'+ma+'padding:8px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">✏️ Manual</button>';
   html += '</div>';
 
-  // Form
-  html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px;">';
-
   if(analiseTab==='url'){
-    html += '<div class="fi"><label>URL do anúncio (AutoScout24, Mobile.de)</label>';
-    html += '<input id="anUrl_'+prefix+'" type="text" placeholder="https://www.autoscout24.de/...">';
+    html += '<div class="fi"><label>URL do anúncio (AutoScout24 / Mobile.de)</label>';
+    html += '<input id="anUrl" type="text" placeholder="https://www.autoscout24.de/..." oninput="updatePromptPreview()">';
     html += '</div>';
   } else {
     html += '<div class="fi-row">';
-    html += '<div class="fi"><label>Marca</label><input id="anMarca_'+prefix+'" placeholder="Mercedes-Benz" value="Mercedes-Benz"></div>';
-    html += '<div class="fi"><label>Modelo</label><input id="anModelo_'+prefix+'" placeholder="A 250 e Progressive" value="A 250 e Progressive"></div>';
+    html += '<div class="fi"><label>Marca</label><input id="anMarca" placeholder="Mercedes-Benz" value="Mercedes-Benz" oninput="updatePromptPreview()"></div>';
+    html += '<div class="fi"><label>Modelo</label><input id="anModelo" placeholder="A 250 e" value="A 250 e" oninput="updatePromptPreview()"></div>';
     html += '</div>';
     html += '<div class="fi-row">';
-    html += '<div class="fi"><label>Ano</label><input id="anAno_'+prefix+'" type="number" placeholder="2022" value="2022"></div>';
-    html += '<div class="fi"><label>Quilómetros</label><input id="anKm_'+prefix+'" type="number" placeholder="80000" value="80000"></div>';
+    html += '<div class="fi"><label>Versão / Linha</label><input id="anVersao" placeholder="AMG Line" value="AMG Line" oninput="updatePromptPreview()"></div>';
+    html += '<div class="fi"><label>Ano</label><input id="anAno" type="number" placeholder="2020" value="2020" oninput="updatePromptPreview()"></div>';
     html += '</div>';
     html += '<div class="fi-row">';
-    html += '<div class="fi"><label>Combustível</label><select id="anComb_'+prefix+'"><option>Híbrido Plug-In</option><option>Elétrico</option><option>Gasolina</option><option>Diesel</option></select></div>';
-    html += '<div class="fi"><label>Preço DE (sem IVA, EUR)</label><input id="anPreco_'+prefix+'" type="number" placeholder="17500" value="17500"></div>';
+    html += '<div class="fi"><label>Quilómetros</label><input id="anKm" type="number" placeholder="64351" value="64351" oninput="updatePromptPreview()"></div>';
+    html += '<div class="fi"><label>Combustível</label><select id="anComb" onchange="updatePromptPreview()"><option>Hibrido Plug-In</option><option>Eletrico</option><option>Gasolina</option><option>Diesel</option></select></div>';
     html += '</div>';
-    html += '<div class="fi"><label>Versão / Equipamentos (opcional)</label><input id="anVersao_'+prefix+'" placeholder="Progressive Leder Navi" value="Progressive"></div>';
+    html += '<div class="fi"><label>Preço DE (sem IVA alemão, EUR)</label><input id="anPreco" type="number" placeholder="17500" value="17500" oninput="updatePromptPreview()"></div>';
   }
 
-  html += '<button class="btn btn-gold" id="anBtn_'+prefix+'" onclick="runAnalise(\''+prefix+'\')" style="margin-top:10px;width:100%;padding:14px;font-size:14px;">🚀 Analisar Oportunidade</button>';
-  html += '<div id="anStatus_'+prefix+'" style="margin-top:14px;display:none;"></div>';
+  html += '</div>';
+
+  // PASSO 2: Prompt
+  html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">';
+  html += '<div style="font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;">📋 Passo 2 · Copiar Prompt</div>';
+  html += '<div style="display:flex;gap:8px;">';
+  html += '<button class="btn btn-gold" onclick="copyPrompt()" style="padding:8px 16px;font-size:12px;">📋 Copiar Prompt</button>';
+  html += '<button class="btn btn-ghost" onclick="openClaudeAi()" style="padding:8px 16px;font-size:12px;">🤖 Abrir Claude.ai</button>';
+  html += '</div></div>';
+  html += '<textarea id="anPromptPreview" readonly style="width:100%;min-height:160px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:6px;padding:12px;color:var(--grey);font-family:monospace;font-size:11px;line-height:1.5;resize:vertical;" placeholder="O prompt vai aparecer aqui..."></textarea>';
+  html += '</div>';
+
+  // PASSO 3: Paste JSON
+  html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">';
+  html += '<div style="font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;">📥 Passo 3 · Colar Resposta JSON</div>';
+  html += '<button class="btn btn-gold" onclick="parseAnaliseJson()" style="padding:8px 16px;font-size:12px;">🎯 Renderizar Relatório</button>';
+  html += '</div>';
+  html += '<textarea id="anJsonInput" placeholder=\'Cola aqui o JSON que recebeste do Claude.ai (começa por { e acaba por })...\' style="width:100%;min-height:140px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:6px;padding:12px;color:var(--white);font-family:monospace;font-size:11px;line-height:1.5;resize:vertical;"></textarea>';
+  html += '<div id="anJsonError" style="margin-top:10px;font-size:12px;color:var(--red);display:none;"></div>';
   html += '</div>';
 
   // Container resultado
-  html += '<div id="anResult_'+prefix+'"></div>';
+  html += '<div id="anResult"></div>';
 
-  g(containerId).innerHTML = html;
+  g('analiseContent').innerHTML = html;
+  updatePromptPreview();
 }
 
-function setAnaliseTab(tab, prefix){
+function setAnaliseTab(tab){
   analiseTab = tab;
-  buildAnalise(prefix);
+  buildAnalise();
 }
 
-function runAnalise(prefix){
-  var btn = g('anBtn_'+prefix);
-  var statusDiv = g('anStatus_'+prefix);
-  var resultDiv = g('anResult_'+prefix);
-
-  // Recolher dados
+function updatePromptPreview(){
   var inputData = {};
   if(analiseTab==='url'){
-    var url = g('anUrl_'+prefix).value.trim();
-    if(!url){ showToast('Cole um URL primeiro'); return; }
-    inputData.url = url;
+    var urlEl = g('anUrl');
+    inputData.url = urlEl ? urlEl.value.trim() : '';
   } else {
-    inputData.marca = g('anMarca_'+prefix).value.trim();
-    inputData.modelo = g('anModelo_'+prefix).value.trim();
-    inputData.versao = g('anVersao_'+prefix).value.trim();
-    inputData.ano = parseInt(g('anAno_'+prefix).value)||0;
-    inputData.km = parseInt(g('anKm_'+prefix).value)||0;
-    inputData.comb = g('anComb_'+prefix).value;
-    inputData.precoDE = parseInt(g('anPreco_'+prefix).value)||0;
-    if(!inputData.marca||!inputData.modelo||!inputData.precoDE){
-      showToast('Preencha pelo menos marca, modelo e preço');
-      return;
+    var marcaEl = g('anMarca'); if(marcaEl) inputData.marca = marcaEl.value.trim();
+    var modeloEl = g('anModelo'); if(modeloEl) inputData.modelo = modeloEl.value.trim();
+    var versaoEl = g('anVersao'); if(versaoEl) inputData.versao = versaoEl.value.trim();
+    var anoEl = g('anAno'); if(anoEl) inputData.ano = parseInt(anoEl.value)||0;
+    var kmEl = g('anKm'); if(kmEl) inputData.km = parseInt(kmEl.value)||0;
+    var combEl = g('anComb'); if(combEl) inputData.comb = combEl.value;
+    var precoEl = g('anPreco'); if(precoEl) inputData.precoDE = parseInt(precoEl.value)||0;
+  }
+  var preview = g('anPromptPreview');
+  if(preview) preview.value = buildAnalisePrompt(inputData);
+}
+
+function copyPrompt(){
+  var preview = g('anPromptPreview');
+  if(!preview || !preview.value){ showToast('Preenche os dados primeiro'); return; }
+  preview.select();
+  try {
+    document.execCommand('copy');
+    showToast('✓ Prompt copiado! Cola no Claude.ai');
+  } catch(e){
+    // Fallback moderno
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(preview.value);
+      showToast('✓ Prompt copiado! Cola no Claude.ai');
+    } else {
+      showToast('Copia manualmente (Ctrl+C)');
     }
   }
+}
 
-  btn.disabled = true;
-  btn.textContent = '⏳ A pesquisar mercado português...';
-  statusDiv.style.display = 'block';
-  statusDiv.innerHTML = '<div style="padding:14px;background:rgba(200,162,78,0.06);border-left:3px solid var(--gold);border-radius:4px;font-size:12px;color:var(--grey);">⏳ A consultar o mercado em tempo real. Isto pode demorar 15-30 segundos...</div>';
-  resultDiv.innerHTML = '';
+function openClaudeAi(){
+  window.open('https://claude.ai/new', '_blank');
+}
 
-  // Construir prompt
-  var promptText = buildAnalisePrompt(inputData);
+function parseAnaliseJson(){
+  var input = g('anJsonInput');
+  var errorDiv = g('anJsonError');
+  errorDiv.style.display = 'none';
+  errorDiv.textContent = '';
 
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:3000,
-      tools:[{type:'web_search_20250305',name:'web_search'}],
-      messages:[{role:'user',content:promptText}]
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    btn.disabled = false;
-    btn.textContent = '🚀 Analisar Oportunidade';
-    statusDiv.style.display = 'none';
+  if(!input || !input.value.trim()){
+    errorDiv.textContent = 'Cola o JSON de resposta primeiro';
+    errorDiv.style.display = 'block';
+    return;
+  }
 
-    // Extrair texto da resposta (pode haver vários blocos)
-    var fullText = '';
-    if(data.content && Array.isArray(data.content)){
-      data.content.forEach(function(block){
-        if(block.type==='text' && block.text) fullText += block.text + '\n';
-      });
-    }
-    if(!fullText){
-      throw new Error('Resposta vazia da IA');
-    }
+  var text = input.value.trim();
+  // Extrair JSON se vier com texto à volta
+  var jsonMatch = text.match(/\{[\s\S]*\}/);
+  if(!jsonMatch){
+    errorDiv.textContent = '❌ Não foi encontrado JSON válido no texto';
+    errorDiv.style.display = 'block';
+    return;
+  }
 
-    // Tentar extrair JSON
-    var jsonMatch = fullText.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('Não foi possível extrair análise estruturada');
+  try {
     var result = JSON.parse(jsonMatch[0]);
+    // Validar estrutura mínima
+    if(!result.veiculo || !result.financeiro || !result.veredito){
+      throw new Error('JSON não tem a estrutura esperada (faltam campos veiculo/financeiro/veredito)');
+    }
     lastAnalise = result;
-    renderAnaliseResult(result, prefix);
-  })
-  .catch(function(err){
-    btn.disabled = false;
-    btn.textContent = '🚀 Analisar Oportunidade';
-    statusDiv.style.display = 'block';
-    statusDiv.innerHTML = '<div style="padding:14px;background:rgba(229,57,53,0.08);border-left:3px solid var(--red);border-radius:4px;font-size:12px;color:var(--red);">❌ Erro: '+(err.message||'Tente novamente')+'</div>';
-  });
+    renderAnaliseResult(result, 'analise');
+    showToast('✓ Relatório gerado');
+  } catch(err){
+    errorDiv.textContent = '❌ Erro ao processar JSON: '+err.message;
+    errorDiv.style.display = 'block';
+  }
 }
 
 function buildAnalisePrompt(input){
@@ -2339,7 +2363,7 @@ function buildAnalisePrompt(input){
 }
 
 function renderAnaliseResult(r, prefix){
-  var container = g('anResult_'+prefix);
+  var container = g('anResult');
   var v = r.veiculo || {};
   var s = r.score || {};
   var m = r.mercado || {};
@@ -2442,7 +2466,7 @@ function renderAnaliseResult(r, prefix){
   if(currentUser && currentUser.role==='admin'){
     h += '<div style="display:flex;gap:10px;flex-wrap:wrap;">';
     h += '<button class="btn btn-gold" onclick="saveAnaliseAsVehicle()">💾 Guardar como Veículo</button>';
-    h += '<button class="btn btn-ghost" onclick="g(\'anResult_'+prefix+'\').innerHTML=\'\'">Nova análise</button>';
+    h += '<button class="btn btn-ghost" onclick="g(\'anResult\').innerHTML=\'\';g(\'anJsonInput\').value=\'\'">Nova análise</button>';
     h += '</div>';
   }
 
@@ -2590,15 +2614,7 @@ requestAnimationFrame(function(){
   g('lEmail').focus();
 });
 </script>
-<!-- ═══ AI ASSISTANT WIDGET ═══ -->
-<button id="aiFab" class="ai-fab hidden" onclick="aiToggle()" title="Assistente GermanImport">💬</button>
-<div id="aiChat" class="ai-chat">
-  <div class="ai-chat-header">
-    <div class="avatar">GI</div>
-    <div class="info">
-      <div class="name">Assistente GermanImport</div>
-      <div class="status">Online</div>
-    </div>
+
     <button class="ai-chat-close" onclick="aiToggle()">×</button>
   </div>
   <div id="aiMsgs" class="ai-chat-msgs"></div>
