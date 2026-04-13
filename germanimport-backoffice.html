@@ -277,6 +277,7 @@ a{color:var(--gold);text-decoration:none;}
       <div class="tbar" style="display:flex;gap:8px;margin-bottom:18px;">
         <button class="btn btn-ghost btn-sm" onclick="filterVehicles('all')" data-i18n="filterAll">Todos</button>
         <button class="btn btn-ghost btn-sm" onclick="filterVehicles('Disponível')" data-i18n="filterAvail">Disponíveis</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterVehicles('Offline')">Offline</button>
         <button class="btn btn-ghost btn-sm" onclick="filterVehicles('Reservado')" data-i18n="filterRes">Reservados</button>
       </div>
       <div id="vehicleGrid" class="vgrid"></div>
@@ -443,6 +444,7 @@ var stands = [
 ];
 
 // -- VEHICLES (BLOQUEADO) --
+var currentVehicleFilter='all';
 var vehicles = [
   {
     id:1, marca:'Mercedes', modelo:'A 250e AMG Line', ano:2020, km:64351,
@@ -717,7 +719,22 @@ function doLogin(){
   var pass = g('lPass').value;
   var user = USERS.find(function(u){return u.email===email && u.pass===pass;});
   if(!user){g('lError').style.display='block';return;}
+  // Bloquear login se stand estiver offline/suspenso
+  if(user.role==='stand' && user.sId){
+    var s = stands.find(function(x){return x.id===user.sId;});
+    if(s && s.estado==='Offline'){
+      g('lError').textContent='Acesso suspenso. Contacte info@germanimport.online';
+      g('lError').style.display='block';
+      return;
+    }
+    if(s && s.estado==='Pendente'){
+      g('lError').textContent='Conta pendente de aprovação.';
+      g('lError').style.display='block';
+      return;
+    }
+  }
   g('lError').style.display='none';
+  g('lError').textContent='Credenciais inválidas';
   currentUser = user;
   g('loginOverlay').style.display='none';
   g('app').style.display='flex';
@@ -840,22 +857,67 @@ function renderVehicles(filter){
   list.forEach(function(v){
     var margin=cMargin(v);
     var marginColor=margin>0?'var(--green)':'var(--red)';
+    var badgeClass='badge-blue';
+    if(v.status==='Disponível') badgeClass='badge-green';
+    else if(v.status==='Offline') badgeClass='badge-orange';
+    else if(v.status==='Reservado') badgeClass='badge-blue';
+    else if(v.status==='Vendido') badgeClass='badge-blue';
     h+='<div class="vcard">';
     h+='<div class="vcard-img" style="'+(v.img?'background:url('+v.img+') center/cover':'display:flex;align-items:center;justify-content:center;color:var(--grey);font-size:13px;')+'">'+(!v.img?v.marca+' '+v.modelo:'')+'</div>';
     h+='<div class="vcard-body">';
     h+='<div class="vcard-title">'+v.marca+' '+v.modelo+'</div>';
     h+='<div class="vcard-sub">'+v.ano+' | '+fmt(v.km)+' km | '+v.comb+'</div>';
-    h+='<div class="vcard-row"><span class="vcard-price">EUR '+fmt(pvpFinal(v))+'</span><span class="badge '+(v.status==='Disponível'?'badge-green':'badge-blue')+'">'+v.status+'</span></div>';
+    h+='<div class="vcard-row"><span class="vcard-price">EUR '+fmt(pvpFinal(v))+'</span><span class="badge '+badgeClass+'">'+v.status+'</span></div>';
     h+='<div class="vcard-row"><span style="font-size:12px;color:var(--grey)">'+t('custo')+': EUR '+fmt(cTotal(v))+'</span><span style="font-size:12px;font-weight:600;color:'+marginColor+'">'+t('margem')+': EUR '+fmt(margin)+'</span></div>';
     h+='<div class="vcard-actions">';
     h+='<button class="ficha-btn" onclick="gerarFicha('+v.id+')">'+t('ficha')+'</button>';
     h+='<button class="wa-btn" onclick="shareWhatsApp('+v.id+')">WhatsApp</button>';
     h+='<button class="btn btn-ghost btn-sm" onclick="editVehicle('+v.id+')">'+t('editar')+'</button>';
+    if(v.status==='Disponível'){
+      h+='<button class="btn btn-ghost btn-sm" onclick="setVehicleOffline('+v.id+')" title="Retirar do online" style="color:#f0a878;border-color:#f0a878;">🚫 Offline</button>';
+    } else if(v.status==='Offline'){
+      h+='<button class="btn btn-ghost btn-sm" onclick="setVehicleOnline('+v.id+')" title="Publicar online" style="color:#7ec894;border-color:#7ec894;">✅ Online</button>';
+    }
+    h+='<button class="btn btn-ghost btn-sm" onclick="deleteVehicle('+v.id+')" title="Apagar veículo" style="color:#e57373;border-color:#e57373;">🗑️</button>';
     h+='</div></div></div>';
   });
   g('vehicleGrid').innerHTML=h||'<div style="color:var(--grey)">'+t('semVeiculos')+'</div>';
 }
-function filterVehicles(f){renderVehicles(f);}
+function filterVehicles(f){currentVehicleFilter=f;renderVehicles(f);}
+
+function setVehicleOnline(vid){
+  var v=vehicles.find(function(x){return x.id===vid;});
+  if(!v) return;
+  v.status='Disponível';
+  currentVehicleFilter='all';
+  renderVehicles('all');
+  showToast('Veículo publicado online');
+  if(g('dashAvail')) renderDashboard();
+}
+
+function setVehicleOffline(vid){
+  var v=vehicles.find(function(x){return x.id===vid;});
+  if(!v) return;
+  if(v.status==='Reservado'){ showToast('Não é possível retirar um veículo reservado'); return; }
+  v.status='Offline';
+  currentVehicleFilter='all';
+  renderVehicles('all');
+  showToast('Veículo retirado do online');
+  if(g('dashAvail')) renderDashboard();
+}
+
+function deleteVehicle(vid){
+  var v=vehicles.find(function(x){return x.id===vid;});
+  if(!v) return;
+  if(v.status==='Reservado'){ showToast('Não é possível apagar um veículo reservado'); return; }
+  if(!confirm('Apagar definitivamente o veículo '+v.marca+' '+v.modelo+' ('+v.ano+')?\n\nEsta ação não pode ser desfeita.')) return;
+  var idx=vehicles.findIndex(function(x){return x.id===vid;});
+  if(idx>-1) vehicles.splice(idx,1);
+  if(vehicleDocs[vid]) delete vehicleDocs[vid];
+  renderVehicles(currentVehicleFilter||'all');
+  showToast('Veículo apagado');
+  if(g('dashAvail')) renderDashboard();
+}
 
 // === STAND VEHICLES ===
 function renderStandVehicles(){
@@ -888,61 +950,100 @@ function gerarFicha(vid){
   var pvpSI=pvpSemIva(v);
   var margin=cMargin(v);
   var margemPct=custo>0?Math.round((margin/custo)*1000)/10:0;
+  var isAdmin = currentUser && currentUser.role==='admin';
 
   var h='';
-  // Header
-  h+='<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #c8a24e;">';
-  h+='<div style="font-size:24px;font-weight:700;color:#c8a24e;letter-spacing:0.5px;">GermanImport</div>';
-  h+='<div style="font-size:11px;color:#888;margin-top:2px;">Ficha Técnica e Financeira</div>';
+  // Header compacto
+  h+='<div style="text-align:center;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid #c8a24e;">';
+  h+='<div style="font-size:20px;font-weight:700;color:#c8a24e;letter-spacing:0.5px;">GermanImport</div>';
+  h+='<div style="font-size:10px;color:#888;margin-top:2px;letter-spacing:1px;text-transform:uppercase;">Ficha Técnica e Financeira</div>';
   h+='</div>';
 
-  // Vehicle title
-  h+='<h3 style="font-size:20px;margin-bottom:4px;">'+v.marca+' '+v.modelo+'</h3>';
-  h+='<div class="ficha-sub" style="margin-bottom:16px;">'+v.ano+' &middot; '+fmt(v.km)+' km &middot; '+v.comb+' &middot; '+v.trans+'</div>';
+  // Hero: imagem + título + specs + preço
+  h+='<div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px;">';
+  if(v.img){
+    h+='<div style="width:100%;aspect-ratio:16/9;background:url('+v.img+') center/cover;border-radius:8px;"></div>';
+  }
+  h+='<div>';
+  h+='<h3 style="font-size:22px;margin:0 0 4px 0;color:#111;font-weight:700;">'+v.marca+' '+v.modelo+'</h3>';
+  h+='<div style="font-size:13px;color:#666;margin-bottom:12px;">'+v.ano+' &middot; '+v.cor+' &middot; '+v.trans+'</div>';
 
+  // DADOS CHAVE em destaque (grid 4 colunas)
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">';
+  var kpi=function(label,value,color){
+    return '<div style="background:#f8f5ec;border:1px solid #e8dbb8;border-radius:6px;padding:10px 8px;text-align:center;">'+
+      '<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:4px;">'+label+'</div>'+
+      '<div style="font-size:14px;font-weight:700;color:'+(color||'#111')+';">'+value+'</div>'+
+      '</div>';
+  };
+  h+=kpi('Ano',v.ano);
+  h+=kpi('Km',fmt(v.km));
+  h+=kpi('Combustível',v.comb);
+  h+=kpi('Câmbio',v.trans);
+  h+='</div>';
+
+  // PVP em destaque grande
+  h+='<div style="background:linear-gradient(135deg,#c8a24e,#9d7d36);border-radius:8px;padding:16px;text-align:center;color:#fff;">';
+  h+='<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;opacity:0.9;margin-bottom:4px;">Preço de Venda Sugerido *</div>';
+  h+='<div style="font-size:32px;font-weight:800;line-height:1;">€ '+fmt(v.pvp)+'</div>';
+  h+='<div style="font-size:11px;opacity:0.85;margin-top:4px;">IVA 23% incluído &middot; Valor s/IVA: € '+fmt(pvpSI)+'</div>';
+  h+='<div style="font-size:9px;opacity:0.75;margin-top:6px;font-style:italic;">* mediante avaliação automática atual do mercado</div>';
+  h+='</div>';
+  h+='</div></div>';
+
+  // Descrição
   if(v.desc){
-    h+='<div style="background:#f8f5ec;border-left:3px solid #c8a24e;border-radius:4px;padding:12px 14px;font-size:12px;color:#555;margin-bottom:22px;line-height:1.6;">'+v.desc+'</div>';
+    h+='<div style="background:#f8f5ec;border-left:3px solid #c8a24e;border-radius:4px;padding:12px 14px;font-size:12px;color:#555;margin-bottom:18px;line-height:1.6;">'+v.desc+'</div>';
   }
 
-  // Cost breakdown
-  h+='<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-weight:600;">Breakdown de Custos</div>';
-  h+='<div class="fr"><span class="l">Preço Veículo (sem IVA DE)</span><span style="color:#4caf50;font-weight:600;">EUR '+fmt(si)+'</span></div>';
-  h+='<div class="fr"><span class="l">Transporte DE-PT</span><span>EUR '+fmt(v.transp)+'</span></div>';
-  h+='<div class="fr"><span class="l">Inspeção DEKRA</span><span>EUR '+fmt(v.dekra)+'</span></div>';
-  h+='<div class="fr"><span class="l">Legalização IMT</span><span>EUR '+fmt(v.legal)+'</span></div>';
-  h+='<div class="fr"><span class="l">Serviço GermanImport <small style="color:#999;">(+ IVA dedutível)</small></span><span>EUR '+fmt(v.servico)+'</span></div>';
-  h+='<div class="fr tot"><span class="l">Custo Stand (sem IVA)</span><span class="v">EUR '+fmt(custo)+'</span></div>';
-
-  // Sale price
-  h+='<div style="margin-top:22px;padding-top:14px;border-top:1px solid #eee;">';
-  h+='<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-weight:600;">Preço de Venda</div>';
-  h+='<div class="fr"><span class="l">PVP Mercado (c/IVA 23%)</span><span style="font-weight:600;">EUR '+fmt(v.pvp)+'</span></div>';
-  h+='<div class="fr"><span class="l">PVP sem IVA</span><span style="font-weight:600;color:#c8a24e;">EUR '+fmt(pvpSI)+'</span></div>';
+  // ZONA B2B (só admin/stand com visibilidade de margem) — sempre visível mas agrupado
+  h+='<div style="background:#fafafa;border-radius:8px;padding:14px 16px;margin-bottom:14px;">';
+  h+='<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;font-weight:600;">🔒 Informação B2B &middot; Custos</div>';
+  h+='<div class="fr"><span class="l">Preço Veículo (s/IVA DE)</span><span style="color:#4caf50;font-weight:600;">€ '+fmt(si)+'</span></div>';
+  h+='<div class="fr"><span class="l">Transporte DE–PT</span><span>€ '+fmt(v.transp)+'</span></div>';
+  h+='<div class="fr"><span class="l">Inspeção DEKRA</span><span>€ '+fmt(v.dekra)+'</span></div>';
+  h+='<div class="fr"><span class="l">Legalização IMT</span><span>€ '+fmt(v.legal)+'</span></div>';
+  h+='<div class="fr"><span class="l">Serviço GermanImport <small style="color:#999;">(+ IVA)</small></span><span>€ '+fmt(v.servico)+'</span></div>';
+  h+='<div class="fr tot"><span class="l">Custo Total Stand (s/IVA)</span><span class="v">€ '+fmt(custo)+'</span></div>';
   h+='</div>';
 
-  // Margin highlight
-  var marginBg=margin>0?'#f0faf0':'#fdf0f0';
+  // Margem — destaque visual grande
+  var marginBg=margin>0?'linear-gradient(135deg,#f0faf0,#e8f5e9)':'linear-gradient(135deg,#fdf0f0,#ffebee)';
   var marginBorder=margin>0?'#4caf50':'#e53935';
   var marginColor=margin>0?'#2e7d32':'#c62828';
-  h+='<div style="margin-top:18px;padding:18px;background:'+marginBg+';border:1px solid '+marginBorder+';border-radius:8px;">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;">';
-  h+='<div><div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;">Margem do Stand</div>';
-  h+='<div style="font-size:12px;color:#888;margin-top:2px;">PVP s/IVA - Custo Stand</div></div>';
-  h+='<div style="text-align:right;"><div style="font-size:28px;font-weight:700;color:'+marginColor+';">EUR '+fmt(margin)+'</div>';
+  var marginEmoji=margin>3000?'🟢':(margin>1000?'🟡':'🔴');
+  h+='<div style="background:'+marginBg+';border:2px solid '+marginBorder+';border-radius:10px;padding:16px 18px;margin-bottom:14px;">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">';
+  h+='<div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">'+marginEmoji+' Margem Bruta</div>';
+  h+='<div style="font-size:11px;color:#888;margin-top:2px;">PVP s/IVA − Custo Stand</div></div>';
+  h+='<div style="text-align:right;"><div style="font-size:30px;font-weight:800;color:'+marginColor+';line-height:1;">€ '+fmt(margin)+'</div>';
   if(custo>0){
-    h+='<div style="font-size:11px;color:#666;">Rentabilidade: '+margemPct.toLocaleString('pt-PT')+'%</div>';
+    h+='<div style="font-size:11px;color:#555;margin-top:4px;font-weight:600;">Rentabilidade: '+margemPct.toLocaleString('pt-PT')+'%</div>';
   }
   h+='</div></div></div>';
 
-  // Note
-  h+='<div class="ficha-note" style="margin-top:14px;">';
-  h+='<strong>ISV estimado:</strong> EUR '+fmt(v.isv)+' (liquidado pelo stand na matrícula, não incluído no custo).<br>';
-  h+='<strong>IVA do serviço GermanImport:</strong> pode ser dedutível para stands com CAE 45110 e regime normal de IVA. Aplicação depende do regime fiscal de cada stand - consulte o seu contabilista.';
+  // ISV e notas fiscais — compacto
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">';
+  h+='<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:10px 12px;">';
+  h+='<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:2px;">ISV Estimado</div>';
+  h+='<div style="font-size:16px;font-weight:700;color:#f57c00;">€ '+fmt(v.isv)+'</div>';
+  h+='<div style="font-size:10px;color:#888;margin-top:2px;">Liquidado na matrícula</div>';
+  h+='</div>';
+  h+='<div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:6px;padding:10px 12px;">';
+  h+='<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:2px;">IVA Serviço</div>';
+  h+='<div style="font-size:16px;font-weight:700;color:#1976d2;">Dedutível*</div>';
+  h+='<div style="font-size:10px;color:#888;margin-top:2px;">CAE 45110 &middot; Regime normal</div>';
+  h+='</div>';
+  h+='</div>';
+
+  // Nota fiscal
+  h+='<div class="ficha-note" style="font-size:11px;line-height:1.5;">';
+  h+='<strong>* Importante:</strong> a dedutibilidade do IVA depende do regime fiscal aplicável ao stand. Se o veículo for vendido pelo Regime da Margem, a dedução poderá não ser permitida. Consulte sempre o seu contabilista.';
   h+='</div>';
 
   // Actions
   h+='<div class="ficha-actions">';
-  h+='<button onclick="printFicha()" style="background:#c8a24e;color:#111;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Imprimir / PDF</button>';
+  h+='<button onclick="printFicha()" style="background:#c8a24e;color:#111;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">📄 Imprimir / PDF</button>';
   h+='<button onclick="closeFicha()" style="background:#eee;color:#333;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">Fechar</button>';
   h+='</div>';
 
@@ -952,14 +1053,41 @@ function gerarFicha(vid){
 
 function printFicha(){
   var content=g('fichaContainer').innerHTML;
+  var css='body{font-family:DM Sans,Arial,sans-serif;padding:30px;color:#111;max-width:720px;margin:auto;}'+
+    '.fr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:13px;}'+
+    '.fr .l{color:#555;}'+
+    '.fr.tot{border-top:2px solid #111;border-bottom:none;padding-top:12px;margin-top:8px;font-weight:700;font-size:15px;}'+
+    '.ficha-note{background:#f8f5ec;border-radius:6px;padding:12px;margin-top:16px;font-size:12px;color:#555;}'+
+    '.ficha-actions{display:none !important;}'+
+    'h3{margin:0 0 4px 0;}'+
+    '@media print{body{padding:15px;}@page{margin:15mm;}}';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ficha GermanImport - '+new Date().toLocaleDateString('pt-PT')+'</title><style>'+css+'</style></head><body>'+content+'<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script></body></html>';
+
   var win=window.open('','_blank');
-  win.document.write('<html><head><title>Ficha GermanImport</title>');
-  win.document.write('<style>body{font-family:DM Sans,Arial,sans-serif;padding:40px;color:#111;max-width:600px;margin:auto;}.fr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:13px;}.fr .l{color:#555;}.fr.tot{border-top:2px solid #111;border-bottom:none;padding-top:12px;margin-top:8px;font-weight:700;font-size:15px;}.ficha-note{background:#f8f5ec;border-radius:6px;padding:12px;margin-top:16px;font-size:12px;color:#555;}.ficha-actions{display:none;}</style>');
-  win.document.write('</head><body>');
-  win.document.write(content);
-  win.document.write('</body></html>');
+  if(!win || win.closed || typeof win.closed==='undefined'){
+    // Popup bloqueado: fallback com iframe
+    var iframe=document.createElement('iframe');
+    iframe.style.position='fixed';
+    iframe.style.right='0';
+    iframe.style.bottom='0';
+    iframe.style.width='0';
+    iframe.style.height='0';
+    iframe.style.border='0';
+    document.body.appendChild(iframe);
+    var doc=iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    setTimeout(function(){
+      try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+      catch(e){ showToast('Não foi possível imprimir. Desative o bloqueador de popups.'); }
+      setTimeout(function(){ document.body.removeChild(iframe); }, 1000);
+    }, 400);
+    return;
+  }
+  win.document.open();
+  win.document.write(html);
   win.document.close();
-  win.print();
 }
 
 // === WHATSAPP SHARE ===
@@ -1036,13 +1164,22 @@ function saveVehicle(){
 function renderStands(){
   var h='';
   stands.forEach(function(s){
-    var bc=s.estado==='Aprovado'?'badge-green':'badge-orange';
+    var bc='badge-orange';
+    if(s.estado==='Aprovado') bc='badge-green';
+    else if(s.estado==='Offline') bc='badge-blue';
     h+='<tr><td>'+s.nome+'</td><td>'+s.contacto+'</td><td>'+s.localidade+'</td>';
     h+='<td><span class="badge '+bc+'">'+s.estado+'</span></td>';
-    h+='<td>';
+    h+='<td style="white-space:nowrap;">';
     if(s.estado==='Pendente'){
-      h+='<button class="btn btn-green btn-sm" onclick="aprovarStand('+s.id+')">Aprovar</button>';
+      h+='<button class="btn btn-green btn-sm" onclick="aprovarStand('+s.id+')">Aprovar</button> ';
     }
+    if(s.estado==='Aprovado'){
+      h+='<button class="btn btn-ghost btn-sm" onclick="setStandOffline('+s.id+')" style="color:#f0a878;border-color:#f0a878;" title="Suspender acesso">🚫 Offline</button> ';
+    }
+    if(s.estado==='Offline'){
+      h+='<button class="btn btn-ghost btn-sm" onclick="setStandOnline('+s.id+')" style="color:#7ec894;border-color:#7ec894;" title="Reativar acesso">✅ Online</button> ';
+    }
+    h+='<button class="btn btn-ghost btn-sm" onclick="deleteStand('+s.id+')" style="color:#e57373;border-color:#e57373;" title="Apagar stand">🗑️</button>';
     h+='</td></tr>';
   });
   g('standsTbody').innerHTML=h;
@@ -1050,6 +1187,32 @@ function renderStands(){
 function aprovarStand(sid){
   var s=stands.find(function(x){return x.id===sid;});
   if(s){s.estado='Aprovado';renderStands();showToast('Stand aprovado!');}
+}
+function setStandOffline(sid){
+  var s=stands.find(function(x){return x.id===sid;});
+  if(!s) return;
+  if(!confirm('Suspender o acesso do stand "'+s.nome+'"?\n\nO stand deixa de poder iniciar sessão até ser reativado.')) return;
+  s.estado='Offline';
+  renderStands();
+  showToast('Stand suspenso');
+}
+function setStandOnline(sid){
+  var s=stands.find(function(x){return x.id===sid;});
+  if(!s) return;
+  s.estado='Aprovado';
+  renderStands();
+  showToast('Stand reativado');
+}
+function deleteStand(sid){
+  var s=stands.find(function(x){return x.id===sid;});
+  if(!s) return;
+  var hasRes=reservations.some(function(r){return r.sId===sid;});
+  if(hasRes){ showToast('Não é possível apagar: stand tem reservas associadas'); return; }
+  if(!confirm('Apagar definitivamente o stand "'+s.nome+'"?\n\nEsta ação não pode ser desfeita.')) return;
+  var idx=stands.findIndex(function(x){return x.id===sid;});
+  if(idx>-1) stands.splice(idx,1);
+  renderStands();
+  showToast('Stand apagado');
 }
 
 // === RESERVAS ===
@@ -1895,44 +2058,44 @@ function buildGuia(){
   // Intro
   h+='<div style="background:linear-gradient(135deg,rgba(200,162,78,0.12),rgba(200,162,78,0.02));border:1px solid var(--gold);border-radius:10px;padding:24px;margin-bottom:22px;">';
   h+='<div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px;">Bem-vindo ao Programa GermanImport</div>';
-  h+='<div style="font-size:13px;color:var(--grey);line-height:1.7;">A GermanImport é a sua plataforma B2B exclusiva para importação de veículos premium da Alemanha. Tratamos de todo o processo - da seleção a entrega - para que o seu stand foque no que faz melhor: vender. Este guia explica todos os passos do processo.</div>';
+  h+='<div style="font-size:13px;color:var(--grey);line-height:1.7;">A GermanImport é a sua plataforma B2B exclusiva para a importação de veículos premium da Alemanha. Tratamos de todo o processo — da seleção à entrega — para que o seu stand se foque no que faz melhor: vender. Este guia explica todos os passos do processo.</div>';
   h+='</div>';
 
-  // Section 1: O Processó Completo
+  // Section 1: O Processo Completo
   var processo='';
-  processo+=step('1','Seleção do Veículo','Navegue pelas oportunidades disponíveis em "Oportunidades". Cada ficha mostra o preço do veículo (sem IVA alemão), todos os custos associados é a margem estimada para o seu stand.');
-  processo+=step('2','Pagamento do Sinal','Acordamos um sinal para garantir a sua intencao. O sinal é sempre descontado no valor total da viatura.');
-  processo+=step('3','Inspeção DEKRA','Antes de avancar com a aquisição, o veículo é inspecionado pela DEKRA na Alemanha. Validamos estado técnico, histórico, quilometragem real e ausencia de problemas estruturais. Recebé o relatório completo + COC.');
-  processo+=step('4','Reserva Confirmada','Após validação técnica positiva, a reserva é confirmada é o veículo fica garantido. Ninguém mais pode adquiri-lo.');
-  processo+=step('5','Pagamento da Viatura','Liquidação do valor total da viatura (descontado do sinal). So após pagamento confirmado avancamos para a aquisição formal.');
-  processo+=step('6','Aquisição na Alemanha','Procedemos a compra formal junto do vendedor alemão. Recebé o Contrato de Aquisição é a Fatura do Veículo.');
-  processo+=step('7','Documentação Alemã','Tratamos do Abmeldung (desmatricula alemã) e de toda a documentação de exportação necessária.');
-  processo+=step('8','Transporte DE-PT','Veículo a caminho de Portugal por transporte profissional. Prazo médio: 7 a 10 dias úteis.');
-  processo+=step('9','Chegada e Legalização','Veículo chega a Portugal. Tratamos de toda a legalização: ISV, matrícula portuguesa, documentos IMT. Prazo médio: 5 a 8 dias úteis.');
-  processo+=step('10','Entrega ao Stand','O veículo é entregue no seu stand, completamente legalizado e pronto a vender.');
-  h+=section('O Processó Passó a Passo','10 Etapas',processo);
+  processo+=step('1','Seleção do Veículo','Navegue pelas oportunidades disponíveis em "Oportunidades". Cada ficha mostra o preço do veículo (sem IVA alemão), todos os custos associados e a margem estimada para o seu stand.');
+  processo+=step('2','Pagamento do Sinal','O sinal corresponde a metade do valor do serviço GermanImport (€ 900) e serve para bloquear o veículo junto do fornecedor na Alemanha. O sinal não é descontado no valor da viatura — é a primeira tranche do serviço de importação.');
+  processo+=step('3','Inspeção DEKRA','Antes de avançarmos com a aquisição, o veículo é inspecionado pela DEKRA na Alemanha. Validamos o estado técnico, o histórico, a quilometragem real e a ausência de problemas estruturais. Recebe o relatório completo e o COC.');
+  processo+=step('4','Reserva Confirmada','Após validação técnica positiva, a reserva é confirmada e o veículo fica garantido. Ninguém mais o poderá adquirir.');
+  processo+=step('5','Pagamento da Viatura','Liquidação do valor total da viatura ao fornecedor alemão. Só após o pagamento estar confirmado avançamos para a aquisição formal.');
+  processo+=step('6','Aquisição na Alemanha','Procedemos à compra formal junto do vendedor alemão. Recebe o contrato de aquisição e a fatura do veículo.');
+  processo+=step('7','Documentação Alemã','Tratamos do Abmeldung (cancelamento de matrícula alemã) e de toda a documentação de exportação necessária.');
+  processo+=step('8','Transporte DE–PT','Veículo a caminho de Portugal por transporte profissional. Prazo médio: 7 a 10 dias úteis.');
+  processo+=step('9','Chegada e Legalização','O veículo chega a Portugal. Tratamos de toda a legalização: ISV, matrícula portuguesa e documentos IMT. Prazo médio: 5 a 8 dias úteis.');
+  processo+=step('10','Entrega ao Stand e Pagamento Final','O veículo é entregue no seu stand, completamente legalizado e pronto a vender. Neste momento é liquidado o remanescente do serviço GermanImport (€ 900 + IVA).');
+  h+=section('O Processo Passo a Passo','10 Etapas',processo);
 
   // Section 2: Estrutura de Custos
   var custos='';
-  custos+='<div style="font-size:13px;color:var(--grey);line-height:1.7;margin-bottom:14px;">A nossa estrutura de custos é totalmente transparente. Todos os valores são apresentados sem IVA - o IVA da viatura e do serviço GermanImport e dedutível para stands com CAE de comércio automóvel.</div>';
+  custos+='<div style="font-size:13px;color:var(--grey);line-height:1.7;margin-bottom:14px;">A nossa estrutura de custos é totalmente transparente. Todos os valores são apresentados sem IVA — o IVA da viatura e do serviço GermanImport é dedutível para stands com CAE de comércio automóvel.</div>';
 
   custos+='<div style="background:rgba(255,255,255,0.02);border-radius:6px;padding:14px;margin-bottom:10px;">';
-  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Preço Veículo (sem IVA DE)</span><span style="color:var(--green);">Negociado caso a caso</span></div>';
-  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Transporte DE-PT</span><span>EUR 900</span></div>';
-  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Inspeção DEKRA</span><span>EUR 130</span></div>';
-  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Legalização IMT</span><span>EUR 200</span></div>';
-  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:var(--grey);">Serviço GermanImport</span><span>EUR 1.800 + IVA</span></div>';
+  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Preço do veículo (sem IVA DE)</span><span style="color:var(--green);">Negociado caso a caso</span></div>';
+  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Transporte DE–PT</span><span>€ 900</span></div>';
+  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Inspeção DEKRA</span><span>€ 130</span></div>';
+  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);"><span style="color:var(--grey);">Legalização IMT</span><span>€ 200</span></div>';
+  custos+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:var(--grey);">Serviço GermanImport</span><span>€ 1.800 + IVA</span></div>';
   custos+='</div>';
 
   custos+='<div style="background:rgba(200,162,78,0.06);border-left:3px solid var(--gold);border-radius:4px;padding:12px;margin-top:12px;font-size:12px;color:var(--grey);line-height:1.6;">';
-  custos+='<strong style="color:var(--gold);">ISV:</strong> Liquidado separadamente na matrícula portuguesa, varia conforme cilindrada, combustível, CO2 e idade do veículo. Para veículos PHEV elegíveis, o ISV pode ser substancialmente reduzido (taxa intermédia de 25%).';
+  custos+='<strong style="color:var(--gold);">ISV:</strong> liquidado separadamente no momento da matrícula portuguesa. Varia consoante a cilindrada, o combustível, as emissões de CO₂ e a idade do veículo. Para veículos PHEV elegíveis, o ISV pode ser substancialmente reduzido (taxa intermédia de 25%).';
   custos+='</div>';
 
   custos+='<div style="background:rgba(200,162,78,0.06);border-left:3px solid var(--gold);border-radius:4px;padding:12px;margin-top:10px;font-size:12px;color:var(--grey);line-height:1.6;">';
-  custos+='<strong style="color:var(--gold);">IVA do Serviço GermanImport:</strong> O IVA (23%) sobre o serviço pode ser dedutível para stands que cumpram <strong style="color:var(--white);">todas</strong> as condições: CAE 45110 (comércio de veículos), regime normal de IVA, fatura com NIF da empresa, e serviço diretamente afeto à atividade tributada.<br><br>';
-  custos+='<strong style="color:var(--white);">Atenção:</strong> Se o veículo for vendido pelo <strong>Regime da Margem de Lucro</strong>, a dedução do IVA do serviço pode não ser permitida para essa viatura específica. Cada caso depende do enquadramento fiscal do stand - consulte sempre o seu contabilista para confirmar.';
+  custos+='<strong style="color:var(--gold);">IVA do serviço GermanImport:</strong> o IVA (23%) sobre o serviço pode ser dedutível para stands que cumpram <strong style="color:var(--white);">todas</strong> as condições: CAE 45110 (comércio de veículos), regime normal de IVA, fatura emitida com o NIF da empresa e serviço diretamente afeto à atividade tributada.<br><br>';
+  custos+='<strong style="color:var(--white);">Atenção:</strong> se o veículo for vendido pelo <strong>Regime da Margem de Lucro</strong>, a dedução do IVA do serviço pode não ser permitida para essa viatura específica. Cada caso depende do enquadramento fiscal do stand — consulte sempre o seu contabilista para confirmar.';
   custos+='</div>';
-  h+=section('Estrutura de Custos','Total Transparencia',custos);
+  h+=section('Estrutura de Custos','Total transparência',custos);
 
   // Section 3: Documentação
   var docs='';
@@ -1946,11 +2109,11 @@ function buildGuia(){
       l+'</div>';
   };
 
-  docs+=phase('1','Validação Técnica',['Relatório DEKRA','Relatório COC'],'#4caf50');
-  docs+=phase('2','Aquisição na Alemanha',['Contrato de Aquisição','Fatura do Veículo'],'#c8a24e');
+  docs+=phase('1','Validação Técnica',['Relatório DEKRA','Certificado COC'],'#4caf50');
+  docs+=phase('2','Aquisição na Alemanha',['Contrato de aquisição','Fatura do veículo'],'#c8a24e');
   docs+=phase('3','Documentação Alemã',['Abmeldung e documentos de exportação'],'#4c8faf');
-  docs+=phase('4','Legalização Portugal',['Documentos IMT (DAV, DUC, matrícula)'],'#9c6bd6');
-  h+=section('Documentação do Processo','Sempre Disponível',docs);
+  docs+=phase('4','Legalização em Portugal',['Documentos IMT (DAV, DUC, matrícula)'],'#9c6bd6');
+  h+=section('Documentação do Processo','Sempre disponível',docs);
 
   // Section 4: Ferramentas
   var ferr='';
@@ -1959,26 +2122,26 @@ function buildGuia(){
 
   ferr+='<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:14px;">';
   ferr+='<div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">Calculadora de Importação</div>';
-  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Introduza o preço sem IVA do veículo na Alemanha é o PVP de mercado em Portugal. A calculadora apresenta o custo total para o seu stand, a margem estimada é a rentabilidade percentual.</div>';
+  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Introduza o preço sem IVA do veículo na Alemanha e o PVP de mercado em Portugal. A calculadora apresenta o custo total para o seu stand, a margem estimada e a rentabilidade em percentagem.</div>';
   ferr+='</div>';
 
   ferr+='<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:14px;">';
-  ferr+='<div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">Simulador ISV (Tabelas oficiais 2026)</div>';
-  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Calculé o ISV exato com base nas tabelas oficiais da Autoridade Tributária. Suporta ligeiros, motos e mercadorias, com regras especiais para PHEV/híbridos e redução por antiguidade.</div>';
+  ferr+='<div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">Simulador de ISV (tabelas oficiais 2026)</div>';
+  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Calcule o ISV exato com base nas tabelas oficiais da Autoridade Tributária. Suporta ligeiros, motociclos e mercadorias, com regras específicas para PHEV/híbridos e redução por antiguidade.</div>';
   ferr+='</div>';
 
   ferr+='<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:14px;">';
   ferr+='<div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">Seguimento de Entrega</div>';
-  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Acompanhe em tempo real o estado de cada veículo - desdé o sinal até a entrega no seu stand. Timeline visual com 10 etapas claramente identificadas.</div>';
+  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Acompanhe em tempo real o estado de cada veículo — desde o sinal até à entrega no seu stand. Cronologia visual com as etapas claramente identificadas.</div>';
   ferr+='</div>';
 
   ferr+='<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:14px;">';
   ferr+='<div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">Ficha Técnica e Partilha</div>';
-  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Cada veículo tem uma ficha completa que pode ser impressa em PDF ou partilhada via WhatsApp diretamente com o cliente final.</div>';
+  ferr+='<div style="font-size:12px;color:var(--grey);line-height:1.6;">Cada veículo tem uma ficha completa que pode ser impressa em PDF ou partilhada por WhatsApp diretamente com o cliente final.</div>';
   ferr+='</div>';
 
   ferr+='</div>';
-  h+=section('Ferramentas Disponíveis','Para o Seu Negócio',ferr);
+  h+=section('Ferramentas Disponíveis','Para o seu negócio',ferr);
 
   // Section 5: FAQ
   var faq='';
@@ -1988,17 +2151,17 @@ function buildGuia(){
       '<div style="font-size:12px;color:var(--grey);line-height:1.6;">'+a+'</div>'+
       '</div>';
   };
-  faq+=question('Quanto tempo demora todo o processo?','Em média, entre 3 a 5 semanas desdé a confirmação da reserva até a entrega no seu stand. O tempo varia conformé a localização do vendedor na Alemanha é a disponibilidade do transporte.');
-  faq+=question('O que acontece sé a inspeção DEKRA detetar problemas?','Se forem detetados problemas significativos, pode optar por cancelar a operação com reembolsó integral do sinal. Pequenas situacoes são reportadas e podem ser negociadas com o vendedor.');
-  faq+=question('O IVA do serviço GermanImport e dedutível?','Sim, para stands com CAE de comércio automóvel o IVA é totalmente dedutível - na prática não é um custo real para o stand.');
-  faq+=question('Posso cancelar uma reserva?','Sim, antes do pagamento da viatura. O sinal pode ou não ser reembolsado dependendo da fase em que se encontra o processo (a discutir caso a caso).');
-  faq+=question('Quem trata da matrícula portuguesa?','A GermanImport trata de todo o processo: DAV, pagamento de ISV, emissão da matrícula portuguesa e entrega de toda a documentação IMT.');
+  faq+=question('Quanto tempo demora todo o processo?','Em média, entre 3 a 5 semanas, desde a confirmação da reserva até à entrega no seu stand. O prazo varia consoante a localização do vendedor na Alemanha e a disponibilidade do transporte.');
+  faq+=question('O que acontece se a inspeção DEKRA detetar problemas?','Se forem detetados problemas significativos, pode optar por cancelar a operação com reembolso integral do sinal. Pequenas situações são reportadas e poderão ser negociadas com o vendedor.');
+  faq+=question('O IVA do serviço GermanImport é dedutível?','Para stands com CAE de comércio automóvel em regime normal de IVA, o IVA é, em regra, totalmente dedutível — na prática, não representa um custo real para o stand. No entanto, se o veículo for vendido pelo Regime da Margem, a dedução poderá não ser permitida. Consulte sempre o seu contabilista.');
+  faq+=question('Posso cancelar uma reserva?','Sim, antes do pagamento da viatura. O sinal (€ 900) poderá ou não ser reembolsado, dependendo da fase em que o processo se encontra (avaliado caso a caso). Se a inspeção DEKRA detetar problemas graves, o sinal é integralmente reembolsado.');
+  faq+=question('Quem trata da matrícula portuguesa?','A GermanImport trata de todo o processo: DAV, pagamento do ISV, emissão da matrícula portuguesa e entrega de toda a documentação IMT.');
   h+=section('Perguntas Frequentes','FAQ',faq);
 
   // Contact section
   h+='<div style="background:linear-gradient(135deg,rgba(200,162,78,0.08),rgba(200,162,78,0.02));border:1px solid var(--gold);border-radius:10px;padding:24px;text-align:center;">';
-  h+='<div style="font-size:14px;font-weight:600;color:var(--gold);margin-bottom:8px;">Precisa de Ajuda?</div>';
-  h+='<div style="font-size:12px;color:var(--grey);line-height:1.7;">A nossa equipa esta disponível para esclarecer qualquer dúvida ao longo do processo.<br>Contacte-nos através do email <strong style="color:var(--white);">info@germanimport.online</strong></div>';
+  h+='<div style="font-size:14px;font-weight:600;color:var(--gold);margin-bottom:8px;">Precisa de ajuda?</div>';
+  h+='<div style="font-size:12px;color:var(--grey);line-height:1.7;">A nossa equipa está disponível para esclarecer qualquer dúvida ao longo do processo.<br>Contacte-nos através do email <strong style="color:var(--white);">info@germanimport.online</strong></div>';
   h+='</div>';
 
   h+='</div>';
@@ -2186,9 +2349,35 @@ function parseAnaliseJson(){
     if(!result.veiculo || !result.financeiro || !result.veredito){
       throw new Error('JSON não tem a estrutura esperada (faltam campos veiculo/financeiro/veredito)');
     }
+    // Recalcular margem com IVA: precos PT trazem IVA 23% incluido
+    var v = result.veiculo;
+    var m = result.mercado || {};
+    var f = result.financeiro || {};
+    var precoMedioCIva = m.medio || 0;
+    var precoMedioSIva = Math.round(precoMedioCIva / 1.23);
+    m.medioSemIva = precoMedioSIva;
+    var custoStand = (v.precoDE||0) + 900 + 130 + 200 + 1800;
+    var isv = f.isv || 0;
+    f.custoStand = custoStand;
+    f.margem = precoMedioSIva - custoStand - isv;
+    f.rentabilidade = custoStand+isv > 0 ? Math.round((f.margem / (custoStand+isv)) * 1000)/10 : 0;
+    f.pvpRecomendado = precoMedioCIva;
+    // Atualizar veredito conforme nova margem
+    if(f.margem >= 3000){
+      result.veredito.emoji = '🟢';
+      if(!result.veredito.label || result.veredito.label.indexOf('ÓTIMO')===-1) result.veredito.label = 'ÓTIMO NEGÓCIO';
+    } else if(f.margem >= 1000){
+      result.veredito.emoji = '🟡';
+      if(!result.veredito.label || result.veredito.label.indexOf('JUSTO')===-1) result.veredito.label = 'NEGÓCIO JUSTO';
+    } else {
+      result.veredito.emoji = '🔴';
+      if(!result.veredito.label || result.veredito.label.indexOf('EVITAR')===-1) result.veredito.label = 'EVITAR / NEGOCIAR';
+    }
+    result.mercado = m;
+    result.financeiro = f;
     lastAnalise = result;
     renderAnaliseResult(result, 'analise');
-    showToast('✓ Relatório gerado');
+    showToast('✓ Relatório gerado (margem recalculada com IVA)');
   } catch(err){
     errorDiv.textContent = '❌ Erro ao processar JSON: '+err.message;
     errorDiv.style.display = 'block';
@@ -2200,18 +2389,22 @@ function buildAnalisePrompt(input){
   p += '1. PESQUISAR a web (Standvirtual, OLX, Carros.pt) por veiculos COMPARAVEIS no mercado portugues\n';
   p += '2. Identificar 3-5 anuncios reais e atuais com a mesma marca/modelo/ano/equipamento\n';
   p += '3. Calcular um SCORE DE SEMELHANCA (0-100) baseado em: versao (30pts), kilometros (20pts), ano (15pts), extras (10pts), cor/comercial (5pts) - escala 0-80 entao normalizar para 100\n';
-  p += '4. Calcular o preco medio do mercado PT\n';
+  p += '4. Calcular o preco medio do mercado PT (precos dos anuncios COM IVA 23% incluido - sao os precos publicos)\n';
   p += '5. Calcular margem usando esta formula FIXA da plataforma:\n';
-  p += '   Custo Stand = PrecoSemIvaDE + 900 (transporte) + 130 (DEKRA) + 200 (legalizacao) + 1800 (servico GermanImport)\n';
-  p += '   Margem = PrecoMedioPT - CustoStand - ISV\n';
+  p += '   precoMedioPT_cIVA = media dos anuncios PT (com IVA)\n';
+  p += '   precoMedioPT_sIVA = precoMedioPT_cIVA / 1.23 (base sem IVA para comparacao real)\n';
+  p += '   custoStand = PrecoSemIvaDE + 900 (transporte) + 130 (DEKRA) + 200 (legalizacao) + 1800 (servico GermanImport)\n';
+  p += '   margem = precoMedioPT_sIVA - custoStand - ISV\n';
   p += '   ISV: 177 EUR para PHEV elegivel, 1500 EUR para Diesel, 1200 EUR para Gasolina, 0 para Eletrico\n';
+  p += '   pvpRecomendado = precoMedioPT_cIVA (preco final ao publico, com IVA)\n';
+  p += '   rentabilidade = (margem / (custoStand + ISV)) * 100\n';
   p += '6. Dar veredito 🟢 (margem > 3000), 🟡 (margem 1000-3000), 🔴 (margem < 1000)\n';
   p += '7. Dar uma DICA concreta de negociacao\n\n';
 
   p += 'VEICULO A ANALISAR:\n';
   if(input.url){
     p += 'URL: '+input.url+'\n';
-    p += '(Visita o URL e extrai marca, modelo, ano, km, combustivel, preco)\n';
+    p += '(Visita o URL e extrai marca, modelo, ano, km, combustivel, preco SEM IVA alemao - tipicamente "exkl. MwSt." no anuncio. Se so tiveres o preco com IVA, divide por 1.19)\n';
   } else {
     p += 'Marca: '+input.marca+'\n';
     p += 'Modelo: '+input.modelo+'\n';
@@ -2222,12 +2415,13 @@ function buildAnalisePrompt(input){
     p += 'Preco DE (sem IVA): '+input.precoDE+' EUR\n';
   }
 
-  p += '\nRESPONDE APENAS com um JSON valido (sem texto antes ou depois) com esta estrutura exata:\n';
+  p += '\nIMPORTANTE: Os "mercado.medio/minimo/maximo" devem ser os precos ORIGINAIS dos anuncios PT (com IVA). O calculo de margem usa internamente o valor sem IVA para comparar com o custo do stand. O "pvpRecomendado" e o preco com IVA (final cliente).\n\n';
+  p += 'RESPONDE APENAS com um JSON valido (sem texto antes ou depois) com esta estrutura exata:\n';
   p += '{\n';
   p += '  "veiculo": {"marca":"", "modelo":"", "versao":"", "ano":0, "km":0, "comb":"", "precoDE":0},\n';
   p += '  "score": {"total":0, "versao":0, "km":0, "ano":0, "extras":0, "cor":0, "fiabilidade":""},\n';
   p += '  "comparaveis": [{"versao":"", "ano":0, "km":0, "preco":0, "fonte":"", "score":0, "notas":""}],\n';
-  p += '  "mercado": {"medio":0, "minimo":0, "maximo":0, "totalAnuncios":0},\n';
+  p += '  "mercado": {"medio":0, "minimo":0, "maximo":0, "totalAnuncios":0, "medioSemIva":0},\n';
   p += '  "financeiro": {"custoStand":0, "isv":0, "pvpRecomendado":0, "margem":0, "rentabilidade":0},\n';
   p += '  "veredito": {"emoji":"", "label":"", "descricao":""},\n';
   p += '  "dica": ""\n';
@@ -2282,7 +2476,8 @@ function renderAnaliseResult(r, prefix){
   // Mercado PT
   h += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;">';
   h += '<div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:12px;">📊 Mercado Português</div>';
-  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Preço médio</span><span style="font-weight:700;color:var(--gold);">EUR '+fmt(m.medio)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Preço médio (c/IVA)</span><span style="font-weight:700;color:var(--gold);">EUR '+fmt(m.medio)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Preço médio (s/IVA)</span><span style="color:var(--green);">EUR '+fmt(m.medioSemIva||Math.round((m.medio||0)/1.23))+'</span></div>';
   h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Mínimo</span><span>EUR '+fmt(m.minimo)+'</span></div>';
   h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">Máximo</span><span>EUR '+fmt(m.maximo)+'</span></div>';
   h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-top:1px solid var(--border);margin-top:6px;padding-top:10px;"><span style="color:var(--grey);">Anúncios analisados</span><span>'+m.totalAnuncios+'</span></div>';
@@ -2295,6 +2490,7 @@ function renderAnaliseResult(r, prefix){
   h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">+ Custos importação</span><span>EUR '+fmt(900+130+200+1800)+'</span></div>';
   h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--grey);">+ ISV</span><span>EUR '+fmt(f.isv)+'</span></div>';
   h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;font-weight:700;border-top:1px solid var(--border);margin-top:6px;padding-top:10px;"><span>Custo total stand</span><span style="color:var(--gold);">EUR '+fmt(f.custoStand+f.isv)+'</span></div>';
+  h += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:11px;color:var(--grey);"><span>Margem vs preço médio s/IVA</span><span>EUR '+fmt(f.margem)+'</span></div>';
   h += '</div>';
   h += '</div>';
 
@@ -2363,7 +2559,7 @@ function saveAnaliseAsVehicle(){
     img:'',
     precoReal:v.precoDE, markup:0, preco:v.precoDE,
     transp:900, dekra:130, legal:200, servico:1800, isv:f.isv||0,
-    pvp:f.pvpRecomendado||0, status:'Disponivel'
+    pvp:f.pvpRecomendado||0, status:'Disponível'
   });
   vehicleDocs[newId] = {};
   DOC_TYPES.forEach(function(dt){vehicleDocs[newId][dt.nome]={status:'missing',url:'',date:'',notes:''};});
@@ -2417,7 +2613,8 @@ function exportAnalisePdf(){
   h += '<div style="margin-top:10px;font-size:24px;font-weight:bold;">Margem: €'+fmt(f.margem)+' ('+f.rentabilidade+'%)</div></div>';
 
   h += '<h2>📊 Mercado Português</h2>';
-  h += '<div class="row"><span class="label">Preço médio</span><span><strong>€'+fmt(m.medio)+'</strong></span></div>';
+  h += '<div class="row"><span class="label">Preço médio (c/IVA)</span><span><strong>€'+fmt(m.medio)+'</strong></span></div>';
+  h += '<div class="row"><span class="label">Preço médio (s/IVA)</span><span style="color:#4caf50;">€'+fmt(m.medioSemIva||Math.round((m.medio||0)/1.23))+'</span></div>';
   h += '<div class="row"><span class="label">Mínimo</span><span>€'+fmt(m.minimo)+'</span></div>';
   h += '<div class="row"><span class="label">Máximo</span><span>€'+fmt(m.maximo)+'</span></div>';
   h += '<div class="row"><span class="label">Anúncios analisados</span><span>'+m.totalAnuncios+'</span></div>';
@@ -2481,7 +2678,8 @@ function exportAnaliseNotion(){
 
   md += '## 📊 Mercado Português\n\n';
   md += '| | |\n|---|---|\n';
-  md += '| Preço Médio PT | **€'+fmt(m.medio)+'** |\n';
+  md += '| Preço Médio PT (c/IVA) | **€'+fmt(m.medio)+'** |\n';
+  md += '| Preço Médio PT (s/IVA) | €'+fmt(m.medioSemIva||Math.round((m.medio||0)/1.23))+' |\n';
   md += '| Mínimo | €'+fmt(m.minimo)+' |\n';
   md += '| Máximo | €'+fmt(m.maximo)+' |\n';
   md += '| Anúncios analisados | '+m.totalAnuncios+' |\n\n';
